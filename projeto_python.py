@@ -1,6 +1,7 @@
-
 import psycopg2
 import PySimpleGUI as sg
+
+
 
 
 
@@ -68,23 +69,6 @@ con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2',
 
 
 
-# tirar isso aqui....
-with con:
-    with con.cursor() as cursor:
-        cursor.execute("""CREATE TABLE IF NOT EXISTS cliente (
-            Cod_cliente INTEGER PRIMARY KEY UNIQUE NOT NULL,
-            Nome_cliente VARCHAR(50) NOT NULL,
-            cpf_cliente NUMERIC(11) NOT NULL,
-            data_nasci_cliente DATE NOT NULL,
-            end_cliente VARCHAR(80),
-            email_cliente VARCHAR(50),
-            telefone_cliente NUMERIC(13),
-            sexo_cliente CHAR(1) CHECK (sexo_cliente IN ('M','F'))
-            cep	INTEGER,
-	        uf CHAR(2),
-	        cidade VARCHAR(30),
-	        bairro VARCHAR(30));
-            """)
 
 lista=[]
 indice = 0
