@@ -217,9 +217,11 @@ while True:
                     sg.popup('Cliente já cadatrado')
                 indice = 0
                 atualiza2()
-    elif event == "-EMITIR-" and not window1:
-        window1 = make_win1()
+    elif event == "-EMITIR-":
+        if not window1:
+            window1 = make_win1()
         window2.close()
+        window1 = make_win1()
         
     elif event == "-INSERIR-":
          cursor.execute("INSERT INTO cliente (cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, end_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
