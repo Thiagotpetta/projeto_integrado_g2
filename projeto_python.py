@@ -1,13 +1,13 @@
 import psycopg2
 import PySimpleGUI as sg
 
-
+sg.theme('DarkAmber') 
 
 con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2', 
                        user = 'postgres', password = 'thor1234')
 
 
-def limpar():
+def limpar2():
     window['-cod_cliente-'].update('')
     window['-nome_cliente-'].update('')
     window['-cpf_cliente-'].update('')
@@ -20,52 +20,65 @@ def limpar():
     window['-uf-'].update('')
     window['-cidade-'].update('')
     window['-bairro-'].update('')
+
+
+def limpar1():
+    window['-num_ingresso-'].update('')
+    window['-cod_cliente-'].update('')
+    window['-cod_tipo_ingresso-'].update('')
+    window['-cod_pagamento-'].update('')
+    window['-situacao_ingresso-'].update('')
+    window['-valor_ingresso-'].update('')
+    window['-cod_dependente-'].update('')
+    window['-cal_data-'].update('')
     
+
     
-def atualiza():
-    if len(lista) == 0:
-        limpar()
+def atualiza2():
+    if len(lista2) == 0:
+        limpar2()
     else:
-        window['-cod_cliente-'].update( lista[indice][0] )
-        window['-nome_cliente-'].update( lista[indice][1] )
-        window['-cpf_cliente-'].update( lista[indice][2] )
-        window['-rua_num_cliente-'].update( lista[indice][3] )
-        window['-data_nasci_cliente-'].update( lista[indice][4] )
-        window['-email_cliente-'].update( lista[indice][5] )
-        window['-telefone_cliente-'].update( lista[indice][6] )
-        if lista[indice][7]: 
+        window['-cod_cliente-'].update( lista2[indice2][0] )
+        window['-nome_cliente-'].update( lista2[indice2][1] )
+        window['-cpf_cliente-'].update( lista2[indice2][2] )
+        window['-rua_num_cliente-'].update( lista2[indice2][3] )
+        window['-data_nasci_cliente-'].update( lista2[indice2][4] )
+        window['-email_cliente-'].update( lista2[indice2][5] )
+        window['-telefone_cliente-'].update( lista2[indice2][6] )
+        if lista2[indice2][7]: 
             window['-sexo_cliente-M-'].update(True)
         else: 
             window['-sexo_cliente-F-'].update(True)
-        window['-cep-'].update( lista[indice][7] )
-        window['-uf-'].update( lista[indice][8] )
-        window['-cidade-'].update( lista[indice][9] )
-        window['-bairro-'].update( lista[indice][10] )
+        window['-cep-'].update( lista2[indice2][7] )
+        window['-uf-'].update( lista2[indice2][8] )
+        window['-cidade-'].update( lista2[indice2][9] )
+        window['-bairro-'].update( lista2[indice2][10] )
 
-def atualiza2():
-    if len(lista) == 0:
-        limpar()
+def atualiza1():
+    if len(lista1) == 0:
+        limpar1()
     else:
-        window['-cod_cliente-'].update( lista[indice][0])
+        window['-cod_cliente-'].update( lista1[indice1][0])
              
 
 def todos():
-    global indice
-    global lista
+    global indice2
+    global lista2
     resposta = []
     with con:
         with con.cursor() as cursor:
             cursor.execute("SELECT * FROM cliente;")
             resposta = cursor.fetchall()
-    lista.clear()
+    lista2.clear()
+    listaString = ''
     for i in range(len(resposta)):
-        lista.append( list(resposta[i]) )
-        lista[i][7] = True if lista[i][7] == 'M' else False
+        lista2.append( list(resposta[i]) )
+        lista2[i][7] = True if lista2[i][7] == 'M' else False
         listaString += str(i+1) +') ' + resposta[i][1] + '\n'
         
     sg.popup('Quantidade de registros: ' + str(len(resposta)))
-    indice = 0
-    atualiza()
+    indice2 = 0
+    atualiza2()
 
 
 
@@ -77,9 +90,11 @@ con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2',
 
 
 
-lista=[]
-indice = 0
+lista2=[]
+indice2 = 0
 
+lista1=[]
+indice1 = 0
 
 
 def make_win1():
@@ -117,6 +132,10 @@ def make_win1():
             sg.InputText(size=(40, 1), key="-cal_data-")
         ],
         [
+            sg.Push(), sg.Text("Pequise se o cliente já está cadatrado:"), sg.Push()
+            
+        ],
+        [
             sg.Text("nome_cliente:", size=(8, 1)),
             sg.InputText(size=(40, 1), key="-nome_cliente-")
         ],
@@ -147,12 +166,16 @@ def make_win2():
             sg.InputText(size=(40, 1), key="-data_nasci_cliente-")
         ],
         [
-            sg.Text("end_cliente:", size=(8, 1)),
-            sg.InputText(size=(40, 1), key="-end_cliente-")
+            sg.Text("rua_num_cliente:", size=(8, 1)),
+            sg.InputText(size=(40, 1), key="-rua_num_cliente-")
         ],
         [
             sg.Text("email_cliente:", size=(8, 1)),
             sg.InputText(size=(40, 1), key="-email_cliente-")
+        ],
+        [
+            sg.Text("telefone_cliente:", size=(8, 1)),
+            sg.InputText(size=(40, 1), key="-telefone_cliente-")
         ], 
         [
             sg.Text("sexo_cliente:", size=(8, 1)),
@@ -207,16 +230,16 @@ while True:
             with con.cursor() as cursor:
                 cursor.execute("SELECT * FROM cliente WHERE nome_cliente LIKE %s;",
                     ('%'+values['-nome_cliente-']+'%',))
-                resposta = cursor.fetchall()
-                lista.clear()
-                for i in range(len(resposta)):
-                    lista.append( list(resposta[i]) )
-                if len(resposta) == 0:
+                resposta1 = cursor.fetchall()
+                lista1.clear()
+                for i in range(len(resposta1)):
+                    lista1.append( list(resposta1[i]) )
+                if len(resposta1) == 0:
                     sg.popup('Cliente não cadastrado')   ####Está dando um erro aqui - olhar 
-                elif len(resposta) > 0:
+                elif len(resposta1) > 0:
                     sg.popup('Cliente já cadatrado')
-                indice = 0
-                atualiza2()
+                indice1 = 0
+                atualiza1()
     elif event == "-EMITIR-":
         if not window1:
             window1 = make_win1()
@@ -224,12 +247,15 @@ while True:
         window1 = make_win1()
         
     elif event == "-INSERIR-":
-         cursor.execute("INSERT INTO cliente (cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, end_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
-                    (values['-cod_cliente-'], values['-nome_cliente-'], values['-cpf_cliente-'], values['-data_nasci_cliente-'], 
-                     values['-rua_num_cliente-'], values['-email_cliente-'], values['-telefone_cliente-'], ('M' if values['-sexo_cliente-M-'] else 'F'), 
-                     values['-cep-'], values['-uf-'], values['-cidade-'], values['-bairro-']))
+         with con:
+            with con.cursor() as cursor:
+                cursor.execute("INSERT INTO cliente (cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
+                            (values['-cod_cliente-'], values['-nome_cliente-'], values['-cpf_cliente-'], values['-data_nasci_cliente-'], 
+                            values['-rua_num_cliente-'], values['-email_cliente-'], values['-telefone_cliente-'], ('M' if values['-sexo_cliente-M-'] else 'F'), 
+                            values['-cep-'], values['-uf-'], values['-cidade-'], values['-bairro-']))
+            limpar2()
     elif event == "-LIMPAR-":
-        limpar()
+        limpar2()
     elif event == "-GERAR INGRESSO-":    ### retirar  (cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, end_cliente, email_cliente, telefone_cliente, sexo_cliente)
         with con:
             with con.cursor() as cursor:
@@ -238,14 +264,14 @@ while True:
                      values['-situacao_ingresso-'], values['-valor_ingresso-'], values['-cod_dependente-'], 
                      values['-cal_data-']))
                 ### VAI PRECISAR DE UM BIBLIOTECA QUE GERE UM PDF
-        limpar()
+        limpar1()
     elif event == "-ATUALIZAR-":
         with con:
             with con.cursor() as cursor:
                 cursor.execute("UPDATE cliente SET nome_cliente = %s, cpf_cliente = %s, cpf_cliente = %s, cpf_cliente = %s, cpf_cliente = %s, cpf_cliente = %s, cep = %s, uf = %s, cidade = %s, bairro = %s WHERE cod_cliente = %s",
                     (values['-nome_cliente-'], values['-cpf_cliente-'], values['-data_nasci_cliente-'], values['-end_cliente-'], 
                      values['-email_cliente-'], values['-telefone_cliente-'], values['-genero-'], values['-cod_cliente-']))
-        lista[indice] = [values['-cod_cliente-'], values['-nome_cliente-'], values['-cpf_cliente-'], 
+        lista2[indice2] = [values['-cod_cliente-'], values['-nome_cliente-'], values['-cpf_cliente-'], 
                          values['-data_nasci_cliente-'], values['-end_cliente-'], values['-email_cliente-'], values['-telefone_cliente-'], 
                          ('M' if values['-sexo_cliente-M-'] else 'F'), values['-cep-'], values['-uf-'], values['-cidade-'], values['-bairro-']]  
        
@@ -253,31 +279,31 @@ while True:
         with con:
             with con.cursor() as cursor:
                 cursor.execute("DELETE FROM cliente WHERE cod_cliente = %s", (values['-cod_cliente-'],))
-        lista.pop(indice)
-        indice -= 1
-        atualiza()
+        lista2.pop(indice)
+        indice2 -= 1
+        atualiza2()
     elif event == "-PROCURAR-":
         with con:
             with con.cursor() as cursor:
                 cursor.execute("SELECT * FROM cliente WHERE nome_cliente LIKE %s;",
                     ('%'+values['-nome_cliente-']+'%',))
-                resposta = cursor.fetchall()
+                resposta2 = cursor.fetchall()
                 lista.clear()
-                for i in range(len(resposta)):
-                    lista.append( list(resposta[i]) )
-                sg.popup('Quantidade de registros: ' + str(len(resposta)))
-                indice = 0
-                atualiza()
+                for i in range(len(resposta2)):
+                    lista.append( list(resposta2[i]) )
+                sg.popup('Quantidade de registros: ' + str(len(resposta2)))
+                indice2 = 0
+                atualiza2()
     elif event == "-TODOS-":
         todos()
     elif event == "->>-":
-        indice += 1
-        if indice >= len(lista): indice = len(lista)-1
-        atualiza()
+        indice2 += 1
+        if indice2 >= len(lista2): indice2 = len(lista2)-1
+        atualiza2()
     elif event == "-<<-":
-        indice -= 1
-        if indice <= 0: indice = 0
-        atualiza()
+        indice2 -= 1
+        if indice2 <= 0: indice2 = 0
+        atualiza2()
 
 window1.close()
 window2.close()
