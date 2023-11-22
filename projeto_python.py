@@ -8,7 +8,7 @@ con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2',
 
 
 def limpar2():
-    window['-cod_cliente-'].update('')
+    
     window['-nome_cliente-'].update('')
     window['-cpf_cliente-'].update('')
     window['-rua_num_cliente-'].update('')
@@ -23,11 +23,11 @@ def limpar2():
 
 
 def limpar1():
-    window['-num_ingresso-'].update('')
+    
     window['-cod_cliente-'].update('')
     window['-cod_tipo_ingresso-'].update('')
     window['-cod_pagamento-'].update('')
-    window['-situacao_ingresso-'].update('')
+    
     window['-valor_ingresso-'].update('')
     window['-cod_dependente-'].update('')
     window['-cal_data-'].update('')
@@ -38,14 +38,14 @@ def atualiza2():
     if len(lista2) == 0:
         limpar2()
     else:
-        window['-cod_cliente-'].update( lista2[indice2][0] )
-        window['-nome_cliente-'].update( lista2[indice2][1] )
-        window['-cpf_cliente-'].update( lista2[indice2][2] )
-        window['-rua_num_cliente-'].update( lista2[indice2][3] )
-        window['-data_nasci_cliente-'].update( lista2[indice2][4] )
-        window['-email_cliente-'].update( lista2[indice2][5] )
-        window['-telefone_cliente-'].update( lista2[indice2][6] )
-        if lista2[indice2][7]: 
+        
+        window['-nome_cliente-'].update( lista2[indice2][0] )
+        window['-cpf_cliente-'].update( lista2[indice2][1] )
+        window['-rua_num_cliente-'].update( lista2[indice2][2] )
+        window['-data_nasci_cliente-'].update( lista2[indice2][3] )
+        window['-email_cliente-'].update( lista2[indice2][4] )
+        window['-telefone_cliente-'].update( lista2[indice2][5] )
+        if lista2[indice2][6]: 
             window['-sexo_cliente-M-'].update(True)
         else: 
             window['-sexo_cliente-F-'].update(True)
@@ -100,35 +100,31 @@ indice1 = 0
 def make_win1():
     layout = [    
         [
-            sg.Text("num_ingresso:", size=(8, 1)),
-            sg.InputText(size=(6, 1), key="-num_ingresso-", focus=False)
+            sg.Push(), sg.Text("SISTEMA DE EMISSÃO DE INGRESSO"), sg.Push()
+            
         ],
         [
-            sg.Text("cod_cliente:", size=(8, 1)),
+            sg.Text("Código do cliente:", size=(20, 1)),
             sg.InputText(size=(6, 1), key="-cod_cliente-", focus=False)
         ],
         [
-            sg.Text("cod_tipo_ingresso:", size=(8, 1)),
+            sg.Text("Tipo do ingresso:", size=(20, 1)),
             sg.InputText(size=(6, 1), key="-cod_tipo_ingresso-", focus=False)
         ],
         [
-            sg.Text("cod_pagamento:", size=(8, 1)),
+            sg.Text("Tipo de pagamento:", size=(20, 1)),
             sg.InputText(size=(40, 1), key="-cod_pagamento-", focus=True)
         ],
         [
-            sg.Text("situacao_ingresso:", size=(8, 1)),
-            sg.InputText(size=(40, 1), key="-situacao_ingresso-")
-        ],
-        [
-            sg.Text("valor_ingresso:", size=(8, 1)),
+            sg.Text("valor do ingresso:", size=(20, 1)),
             sg.InputText(size=(40, 1), key="-valor_ingresso-")
         ],
         [
-            sg.Text("cod_dependente:", size=(8, 1)),
+            sg.Text("codigo do dependete:", size=(20, 1)),
             sg.InputText(size=(40, 1), key="-cod_dependente-")
         ],
         [
-            sg.Text("cal_data:", size=(8, 1)),
+            sg.Text("Data:", size=(20, 1)),
             sg.InputText(size=(40, 1), key="-cal_data-")
         ],
         [
@@ -136,7 +132,7 @@ def make_win1():
             
         ],
         [
-            sg.Text("nome_cliente:", size=(8, 1)),
+            sg.Text("Nome do cliente:", size=(20, 1)),
             sg.InputText(size=(40, 1), key="-nome_cliente-")
         ],
         [
@@ -149,10 +145,6 @@ def make_win1():
 
 def make_win2():
     layout = [    
-        [
-            sg.Text("Cod_cliente:", size=(8, 1)),
-            sg.InputText(size=(6, 1), key="-cod_cliente-", focus=False)
-        ],
         [
             sg.Text("Nome_cliente:", size=(8, 1)),
             sg.InputText(size=(40, 1), key="-nome_cliente-", focus=True)
@@ -249,8 +241,8 @@ while True:
     elif event == "-INSERIR-":
          with con:
             with con.cursor() as cursor:
-                cursor.execute("INSERT INTO cliente (cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
-                            (values['-cod_cliente-'], values['-nome_cliente-'], values['-cpf_cliente-'], values['-data_nasci_cliente-'], 
+                cursor.execute("INSERT INTO cliente (nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro) VALUES (  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);",
+                            ( values['-nome_cliente-'], values['-cpf_cliente-'], values['-data_nasci_cliente-'], 
                             values['-rua_num_cliente-'], values['-email_cliente-'], values['-telefone_cliente-'], ('M' if values['-sexo_cliente-M-'] else 'F'), 
                             values['-cep-'], values['-uf-'], values['-cidade-'], values['-bairro-']))
             limpar2()
@@ -259,9 +251,9 @@ while True:
     elif event == "-GERAR INGRESSO-":    ### retirar  (cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, end_cliente, email_cliente, telefone_cliente, sexo_cliente)
         with con:
             with con.cursor() as cursor:
-                cursor.execute("INSERT INTO ingresso (num_ingresso, cod_cliente, cod_tipo_ingresso, cod_pagamento, situacao_ingresso, valor_ingresso, cod_dependente, cal_data) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
-                    (values['-num_ingresso-'], values['-cod_cliente-'], values['-cod_tipo_ingresso-'], values['-cod_pagamento-'], 
-                     values['-situacao_ingresso-'], values['-valor_ingresso-'], values['-cod_dependente-'], 
+                cursor.execute("INSERT INTO ingresso (cod_cliente, cod_tipo_ingresso, cod_pagamento,  valor_ingresso, cod_dependente, cal_data) VALUES (%s, %s, %s, %s, %s, %s);",
+                    (values['-cod_cliente-'], values['-cod_tipo_ingresso-'], values['-cod_pagamento-'], 
+                     values['-valor_ingresso-'], values['-cod_dependente-'], 
                      values['-cal_data-']))
                 ### VAI PRECISAR DE UM BIBLIOTECA QUE GERE UM PDF
         limpar1()
