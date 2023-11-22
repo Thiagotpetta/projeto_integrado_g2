@@ -81,11 +81,13 @@ def todos():
     atualiza2()
 
 
-
+def uf():
+    return['AC ', 'AL', 'AP', 'AM', 'BA', 'CE' , 'DF', 'ES', 'GO', 'MA', 'MT' , 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
 
 # Inicialização BD
 con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2', 
                        user = 'postgres', password = 'thor1234')
+
 
 
 
@@ -179,8 +181,8 @@ def make_win2():
             sg.InputText(size=(40, 1), key="-cep-")
         ],
         [
-            sg.Text("uf:", size=(8, 1)),
-            sg.InputText(size=(40, 1), key="-uf-")
+            sg.Text("Estado:", size=(8, 1)),
+            sg.Combo(uf(), size=(8, 1), key="-uf-")
         ],
         [
             sg.Text("cidade:", size=(8, 1)),
