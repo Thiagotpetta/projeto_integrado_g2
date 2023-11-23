@@ -89,7 +89,9 @@ con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2',
                        user = 'postgres', password = 'thor1234')
 
 
-
+## aqui é o modo de: escrevo uma coisa e ele lê outra
+dicPagamentos={'PIX':1, 'Crédito':2}
+print(dicPagamentos['PIX'])
 
 
 lista2=[]
@@ -138,7 +140,7 @@ def make_win1():
             sg.InputText(size=(40, 1), key="-nome_cliente-")
         ],
         [
-            sg.Button('Castrar oi', size=(8, 1), key="-CADASTRAR-"),
+            sg.Button('Cadastrar', size=(8, 1), key="-CADASTRAR-"),
             sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR-"),
             sg.Button('Gerar', size=(8, 1), key="-GERAR INGRESSO-")
         ]
@@ -148,48 +150,48 @@ def make_win1():
 def make_win2():
     layout = [    
         [
-            sg.Text("Nome_cliente:", size=(8, 1)),
+            sg.Text("Nome:", size=(17, 1)),
             sg.InputText(size=(40, 1), key="-nome_cliente-", focus=True)
         ],
         [
-            sg.Text("cpf_cliente:", size=(8, 1)),
+            sg.Text("CPF:", size=(17, 1)),
             sg.InputText(size=(40, 1), key="-cpf_cliente-")
         ],
         [
-            sg.Text("data_nasci_cliente:", size=(8, 1)),
+            sg.Text("Data de Nascimento:", size=(17, 1)),
             sg.InputText(size=(40, 1), key="-data_nasci_cliente-")
         ],
         [
-            sg.Text("rua_num_cliente:", size=(8, 1)),
-            sg.InputText(size=(40, 1), key="-rua_num_cliente-")
-        ],
-        [
-            sg.Text("email_cliente:", size=(8, 1)),
+            sg.Text("E-mail:", size=(17, 1)),
             sg.InputText(size=(40, 1), key="-email_cliente-")
         ],
         [
-            sg.Text("telefone_cliente:", size=(8, 1)),
+            sg.Text("Telefone:", size=(17, 1)),
             sg.InputText(size=(40, 1), key="-telefone_cliente-")
         ], 
         [
-            sg.Text("sexo_cliente:", size=(8, 1)),
+            sg.Text("Sexo:", size=(17, 1)),
             sg.Radio('Masculino', 'GRUPO1', default=False, key="-sexo_cliente-M-"),
             sg.Radio('Feminino', 'GRUPO1', default=True, key="-sexo_cliente-F-")
         ],
         [
-            sg.Text("cep:", size=(8, 1)),
+            sg.Text("CEP:", size=(17, 1)),
             sg.InputText(size=(40, 1), key="-cep-")
         ],
         [
-            sg.Text("Estado:", size=(8, 1)),
+            sg.Text("Endereço:", size=(17, 1)),
+            sg.InputText(size=(40, 1), key="-rua_num_cliente-")
+        ],
+        [
+            sg.Text("Estado:", size=(17, 1)),
             sg.Combo(uf(), size=(8, 1), key="-uf-")
         ],
         [
-            sg.Text("cidade:", size=(8, 1)),
+            sg.Text("Cidade:", size=(17, 1)),
             sg.InputText(size=(40, 1), key="-cidade-")
         ],
         [
-            sg.Text("bairro:", size=(8, 1)),
+            sg.Text("Bairro:", size=(17, 1)),
             sg.InputText(size=(40, 1), key="-bairro-")
         ],
         [
@@ -216,7 +218,8 @@ while True:
 
     if event == sg.WIN_CLOSED:
         break
-    elif event == "-CADASTRAR-" and not window2:
+    elif event == "-CADASTRAR-":
+        print('Cadastrar....')
         window2 = make_win2()
         window1.close()
     elif event == "-PESQUISAR-":
@@ -235,11 +238,10 @@ while True:
                 indice1 = 0
                 atualiza1()
     elif event == "-EMITIR-":
-        if not window1:
-            window1 = make_win1()
-        window2.close()
+        print('Emitir....')
         window1 = make_win1()
-        
+        window2.close()
+               
     elif event == "-INSERIR-":
          with con:
             with con.cursor() as cursor:
@@ -273,7 +275,7 @@ while True:
         with con:
             with con.cursor() as cursor:
                 cursor.execute("DELETE FROM cliente WHERE cod_cliente = %s", (values['-cod_cliente-'],))
-        lista2.pop(indice)
+        lista2.pop(indice2)
         indice2 -= 1
         atualiza2()
     elif event == "-PROCURAR-":
@@ -282,9 +284,9 @@ while True:
                 cursor.execute("SELECT * FROM cliente WHERE nome_cliente LIKE %s;",
                     ('%'+values['-nome_cliente-']+'%',))
                 resposta2 = cursor.fetchall()
-                lista.clear()
+                lista2.clear()
                 for i in range(len(resposta2)):
-                    lista.append( list(resposta2[i]) )
+                    lista2.append( list(resposta2[i]) )
                 sg.popup('Quantidade de registros: ' + str(len(resposta2)))
                 indice2 = 0
                 atualiza2()
