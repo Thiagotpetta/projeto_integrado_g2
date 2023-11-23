@@ -225,7 +225,7 @@ while True:
     elif event == "-PESQUISAR-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("SELECT * FROM cliente WHERE nome_cliente LIKE %s;",
+                cursor.execute("SELECT nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE nome_cliente LIKE %s;",
                     ('%'+values['-nome_cliente-']+'%',))
                 resposta1 = cursor.fetchall()
                 lista1.clear()
