@@ -41,15 +41,15 @@ def atualiza2():
         
         window['-nome_cliente-'].update( lista2[indice2][0] )
         window['-cpf_cliente-'].update( lista2[indice2][1] )
-        window['-rua_num_cliente-'].update( lista2[indice2][2] )
-        window['-data_nasci_cliente-'].update( lista2[indice2][3] )
-        window['-email_cliente-'].update( lista2[indice2][4] )
-        window['-telefone_cliente-'].update( lista2[indice2][5] )
-        if lista2[indice2][6]: 
+        window['-data_nasci_cliente-'].update( lista2[indice2][2] )
+        window['-email_cliente-'].update( lista2[indice2][3] )
+        window['-telefone_cliente-'].update( lista2[indice2][4] )
+        if lista2[indice2][5]: 
             window['-sexo_cliente-M-'].update(True)
         else: 
             window['-sexo_cliente-F-'].update(True)
-        window['-cep-'].update( lista2[indice2][7] )
+        window['-cep-'].update( lista2[indice2][6] )
+        window['-rua_num_cliente-'].update( lista2[indice2][7] )
         window['-uf-'].update( lista2[indice2][8] )
         window['-cidade-'].update( lista2[indice2][9] )
         window['-bairro-'].update( lista2[indice2][10] )
@@ -281,9 +281,10 @@ while True:
     elif event == "-PROCURAR-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("SELECT * FROM cliente WHERE nome_cliente LIKE %s;",
+                cursor.execute("SELECT nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE nome_cliente LIKE %s;",
                     ('%'+values['-nome_cliente-']+'%',))
                 resposta2 = cursor.fetchall()
+                print(resposta2)
                 lista2.clear()
                 for i in range(len(resposta2)):
                     lista2.append( list(resposta2[i]) )
