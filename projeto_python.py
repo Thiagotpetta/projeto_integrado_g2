@@ -1,5 +1,7 @@
 import psycopg2
 import PySimpleGUI as sg
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 sg.theme('DarkAmber') 
 
@@ -117,6 +119,18 @@ dicTipoIngresso= {'GESTANTE': 1, 'IDOSO': 2, 'COMUM': 3}
 
 def tipoingresso():
     return ['GESTANTE', 'IDOSO', 'COMUM']
+
+
+def gerar_pdf(nome_cliente, tipo_ingresso, valor_ingresso):
+    pdf_file = f'ingresso_{nome_cliente.replace(" ", "_")}.pdf'
+    content = 'Nome do Cliente: {}\nTipo de Ingresso: {}\nValor do Ingresso: R${:.2f}'.format(nome_cliente, tipo_ingresso, float(valor_ingresso))
+    
+
+    c = canvas.Canvas(pdf_file, pagesize=letter)
+    c.drawString(72, 800, content)
+    c.save()
+
+    return pdf_file
 
 lista2=[]
 indice2 = 0
@@ -356,9 +370,15 @@ while True:
                     int(values.get('-cod_dependente-', None)) if values.get('-cod_dependente-', None) else None,
                     values.get('-cal_data-', None),)
                 )
-                    
-        
-        limpar3()
+        # Adicione estas linhas para definir as variáveis
+            nome_cliente = values.get('-nome_cliente-', '')
+            tipo_ingresso = values.get('-cod_tipo_ingresso-', '')
+            valor_ingresso = values.get('-valor_ingresso-', '')
+
+            # Agora, podemos chamar a função gerar_pdf
+            pdf_file = gerar_pdf(nome_cliente, tipo_ingresso, valor_ingresso)
+        sg.popup(f'Ingresso gerado com sucesso: {pdf_file}')
+        limpar1()
     elif event == "-ATUALIZAR-":
         with con:
             with con.cursor() as cursor:
