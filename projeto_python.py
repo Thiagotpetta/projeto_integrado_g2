@@ -2,6 +2,12 @@ import psycopg2
 import PySimpleGUI as sg
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from PIL import Image
+import qrcode
+import random
+import string
+import io
+
 
 sg.theme('DarkAmber') 
 
@@ -121,16 +127,61 @@ def tipoingresso():
     return ['GESTANTE', 'IDOSO', 'COMUM']
 
 
-def gerar_pdf(nome_cliente, tipo_ingresso, valor_ingresso):
-    pdf_file = f'ingresso_{nome_cliente.replace(" ", "_")}.pdf'
-    content = 'Nome do Cliente: {}\nTipo de Ingresso: {}\nValor do Ingresso: R${:.2f}'.format(nome_cliente, tipo_ingresso, float(valor_ingresso))
-    
+def gerar_qr_code_aleatorio():
+    # Gerar uma string aleatória para o conteúdo do QR Code
+    conteudo_qr = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
-    c = canvas.Canvas(pdf_file, pagesize=letter)
-    c.drawString(72, 800, content)
+    # Criar um objeto QR Code
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+
+    # Adicionar os dados ao QR Code
+    qr.add_data(conteudo_qr)
+    qr.make(fit=True)
+
+    # Criar uma imagem do QR Code
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    # Retornar o conteúdo do QR Code como bytes
+    qr_buffer = io.BytesIO()
+    img.save(qr_buffer, format="PNG")
+    return qr_buffer.getvalue()
+
+def criar_ingresso(data, preco, nome_comprador):
+    # Criar um objeto PDF
+    pdf_filename = f"{nome_comprador}.pdf"
+    c = canvas.Canvas(pdf_filename, pagesize=letter)
+
+    # Adicionar imagem ao ingresso (substitua 'seu_logo.png' pelo caminho da sua imagem)
+    imagem_logo = Image.open("seu_logo.jpg")
+    c.drawInlineImage(imagem_logo, 60, 700, width=500, height=90)
+
+    # Adicionar informações ao ingresso
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(215, 670, "Parque da Mônica")
+    c.drawString(50, 630, f"Data: {data}")
+    c.drawString(50, 610, "Local: Av. das Nações Unidas, 22540 - ")
+    c.drawString(50, 590, "Jurubatuba, São Paulo - SP, 04795-000")
+    c.drawString(50, 570, f"Preço: R${preco}")
+    c.drawString(50, 550, f"Nome do Comprador: {nome_comprador}")
+
+    # Adicionar um código de barras fictício (você pode substituir isso por um código de barras real)
+    c.drawString(50, 520, "QRcode: ")
+
+    # Adicionar o QR Code ao PDF
+    qr_content = gerar_qr_code_aleatorio()
+    qr_image = Image.open(io.BytesIO(qr_content))
+    c.drawInlineImage(qr_image, 50, 350, width=150, height=150)
+
+    # Adicionar linha de corte
+    c.line(50, 330, 200, 330)
+
+    # Salvar o PDF
     c.save()
-
-    return pdf_file
 
 lista2=[]
 indice2 = 0
@@ -374,9 +425,10 @@ while True:
             nome_cliente = values.get('-nome_cliente-', '')
             tipo_ingresso = values.get('-cod_tipo_ingresso-', '')
             valor_ingresso = values.get('-valor_ingresso-', '')
+            data = values.get('-cal_data-', '')
 
             # Agora, podemos chamar a função gerar_pdf
-            pdf_file = gerar_pdf(nome_cliente, tipo_ingresso, valor_ingresso)
+            pdf_file = criar_ingresso(data, valor_ingresso, nome_cliente)
         sg.popup(f'Ingresso gerado com sucesso: {pdf_file}')
         limpar1()
     elif event == "-ATUALIZAR-":
