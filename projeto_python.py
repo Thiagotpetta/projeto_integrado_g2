@@ -27,10 +27,18 @@ def limpar1():
     window['-cod_cliente-'].update('')
     window['-cod_tipo_ingresso-'].update('')
     window['-cod_pagamento-'].update('')
-    
     window['-valor_ingresso-'].update('')
     window['-cod_dependente-'].update('')
     window['-cal_data-'].update('')
+
+def limpar3():
+    
+    window['-nome_dependente-'].update('')
+    window['-cpf_dependente-'].update('')
+    window['-data_nasci_dependente-'].update('')
+    window['-sexo_dependente-'].update('')
+    window['-cod_cliente-'].update('')
+   
     
 
     
@@ -53,13 +61,21 @@ def atualiza2():
         window['-uf-'].update( lista2[indice2][8] )
         window['-cidade-'].update( lista2[indice2][9] )
         window['-bairro-'].update( lista2[indice2][10] )
+        
+
 
 def atualiza1():
     if len(lista1) == 0:
         limpar1()
     else:
         window['-cod_cliente-'].update( lista1[indice1][0])
-             
+
+def atualiza3():
+    if len(lista3) == 0:
+        limpar3()
+    else:
+        window['-cod_dependente-'].update( lista3[indice3][0])
+        window['-cod_cliente-'].update( lista3[indice3][5])
 
 def todos():
     global indice2
@@ -67,14 +83,13 @@ def todos():
     resposta = []
     with con:
         with con.cursor() as cursor:
-            cursor.execute("SELECT * FROM cliente;")
+            cursor.execute("SELECT nome_cliente, cpf_cliente, data_nasci_cliente, email_cliente, telefone_cliente, sexo_cliente, cep,rua_num_cliente, uf, cidade, bairro FROM cliente;")
             resposta = cursor.fetchall()
     lista2.clear()
     listaString = ''
     for i in range(len(resposta)):
         lista2.append( list(resposta[i]) )
-        lista2[i][7] = True if lista2[i][7] == 'M' else False
-        listaString += str(i+1) +') ' + resposta[i][1] + '\n'
+        lista2[i][5] = True if lista2[i][5] == 'M' else False
         
     sg.popup('Quantidade de registros: ' + str(len(resposta)))
     indice2 = 0
@@ -82,7 +97,9 @@ def todos():
 
 
 def uf():
-    return['AC ', 'AL', 'AP', 'AM', 'BA', 'CE' , 'DF', 'ES', 'GO', 'MA', 'MT' , 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
+    return['AC ', 'AL', 'AP', 'AM', 'BA', 'CE' , 'DF', 'ES', 'GO', 'MA', 'MT' , 
+           'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
+
 
 # Inicialização BD
 con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2', 
@@ -90,34 +107,44 @@ con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2',
 
 
 ## aqui é o modo de: escrevo uma coisa e ele lê outra
-dicPagamentos={'PIX':1, 'Crédito':2}
-print(dicPagamentos['PIX'])
+dicPagamentos={'PIX':1, 'CRÉDITO':2, 'DÉBITO': 3, 'DINHEIRO': 4, 'GRATUIDADE':5 }
 
+def pagamentos():
+    return ['PIX', 'CRÉDITO', 'DÉBITO', 'DINHEIRO', 'GRATUIDADE']
+
+
+dicTipoIngresso= {'GESTANTE': 1, 'IDOSO': 2, 'COMUM': 3}
+
+def tipoingresso():
+    return ['GESTANTE', 'IDOSO', 'COMUM']
 
 lista2=[]
 indice2 = 0
 
+
 lista1=[]
 indice1 = 0
 
+lista3=[]
+indice3 = 0
+
+
+import PySimpleGUI as sg
 
 def make_win1():
     layout = [    
-        [
-            sg.Push(), sg.Text("SISTEMA DE EMISSÃO DE INGRESSO"), sg.Push()
-            
-        ],
+
         [
             sg.Text("Código do cliente:", size=(20, 1)),
             sg.InputText(size=(6, 1), key="-cod_cliente-", focus=False)
         ],
         [
             sg.Text("Tipo do ingresso:", size=(20, 1)),
-            sg.InputText(size=(6, 1), key="-cod_tipo_ingresso-", focus=False)
+            sg.Combo(tipoingresso(), size=(13, 1), key="-cod_tipo_ingresso-") 
         ],
         [
             sg.Text("Tipo de pagamento:", size=(20, 1)),
-            sg.InputText(size=(40, 1), key="-cod_pagamento-", focus=True)
+            sg.Combo(pagamentos(), size=(13, 1), key="-cod_pagamento-") 
         ],
         [
             sg.Text("valor do ingresso:", size=(20, 1)),
@@ -132,20 +159,29 @@ def make_win1():
             sg.InputText(size=(40, 1), key="-cal_data-")
         ],
         [
-            sg.Push(), sg.Text("Pequise se o cliente já está cadatrado:"), sg.Push()
+            sg.Push(), sg.Text("Pequise se o cliente e o dependente já está cadatrado:"), sg.Push()
             
         ],
         [
             sg.Text("Nome do cliente:", size=(20, 1)),
-            sg.InputText(size=(40, 1), key="-nome_cliente-")
+            sg.InputText(size=(40, 1), key="-nome_cliente-"), sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR-")
         ],
         [
-            sg.Button('Cadastrar', size=(8, 1), key="-CADASTRAR-"),
-            sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR-"),
-            sg.Button('Gerar', size=(8, 1), key="-GERAR INGRESSO-")
+            sg.Text("Nome do Dependente:", size=(20, 1)),
+            sg.InputText(size=(40, 1), key="-nome_dependente-"), sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR3-")
+        ],
+        [
+            sg.Button('Cadastrar', size=(8, 2), key="-CADASTRAR-"),
+            sg.Button('Gerar Ingresso', size=(8, 2), key="-GERAR INGRESSO-"),
+            sg.Button('Cadastrar Depedente', size=(8, 2), key="-DEPENDENTE-")
         ]
+        
     ]
+
     return sg.Window('Cadastrinho...', layout, finalize=True, location=(100, 100))
+
+
+
 
 def make_win2():
     layout = [    
@@ -211,7 +247,54 @@ def make_win2():
     ]
     return sg.Window("Cadastlo do cebola", layout, finalize=True, location=(100, 100))
 
-window1, window2 = make_win1(), None 
+def make_win3():
+ 
+    
+    layout = [    
+        [
+            sg.Push(), sg.Text("CADASTRO DE DEPENDENTE"), sg.Push()
+            
+        ],
+        [
+            sg.Text("Código do cliente:", size=(20, 1)),
+            sg.InputText(size=(40, 1), key="-cod_cliente-")
+        ],
+        [
+            sg.Text("Nome:", size=(20, 1)),
+            sg.InputText(size=(6, 1), key="-nome_dependente-", focus=False)      
+        ],
+        [
+            sg.Text("CPF:", size=(20, 1)),
+            sg.InputText(size=(6, 1), key="-cpf_dependente-", focus=False)
+        ],
+        [
+            sg.Text("Data de Nascimento:", size=(20, 1)),
+            sg.InputText(size=(40, 1), key="-data_nasci_dependente-", focus=True)
+        ],
+        [
+            sg.Text("Sexo:", size=(20, 1)),
+            sg.InputText(size=(40, 1), key="-sexo_dependente-")
+        ],
+        
+        [
+            sg.Push(), sg.Text("Pequise o código do cliente:"), sg.Push()
+            
+        ],
+        [
+            sg.Text("CPF do cliente:", size=(20, 1)),
+            sg.InputText(size=(40, 1), key="-cpf_cliente-")
+        ],
+        [
+            sg.Button('Cadastrar', size=(8, 1), key="-CADASTRAR2-"),
+            sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR-"),
+            sg.Button('Gerar Ingresso', size=(8, 1), key="-GERAR INGRESSO-"),
+            sg.Button('Emitir', size=(8, 1), key="-EMITIR3-")
+        ]
+    ]
+    return sg.Window('Cadastlo do dependente...', layout, finalize=True, location=(100, 100))
+
+window1, window2, window3 = make_win1(), None, None 
+
 
 while True:
     window, event, values = sg.read_all_windows()
@@ -225,7 +308,7 @@ while True:
     elif event == "-PESQUISAR-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("SELECT nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE nome_cliente LIKE %s;",
+                cursor.execute("SELECT cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE nome_cliente LIKE %s;",
                     ('%'+values['-nome_cliente-']+'%',))
                 resposta1 = cursor.fetchall()
                 lista1.clear()
@@ -235,12 +318,20 @@ while True:
                     sg.popup('Cliente não cadastrado')   ####Está dando um erro aqui - olhar 
                 elif len(resposta1) > 0:
                     sg.popup('Cliente já cadatrado')
+                    atualiza1()
                 indice1 = 0
-                atualiza1()
+            
+                
+                
     elif event == "-EMITIR-":
         print('Emitir....')
         window1 = make_win1()
         window2.close()
+    
+    elif event == "-EMITIR3-":
+        print('Emitir....')
+        window1 = make_win1()
+        window3.close()
                
     elif event == "-INSERIR-":
          with con:
@@ -252,15 +343,22 @@ while True:
             limpar2()
     elif event == "-LIMPAR-":
         limpar2()
-    elif event == "-GERAR INGRESSO-":    ### retirar  (cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, end_cliente, email_cliente, telefone_cliente, sexo_cliente)
+    elif event == "-GERAR INGRESSO-":    
         with con:
             with con.cursor() as cursor:
+                cod_pagamento = dicPagamentos.get(values.get('-cod_pagamento-', ''), None)
+                cod_tipo_ingresso = dicTipoIngresso.get(values.get('-cod_tipo_ingresso-', ''), None)
                 cursor.execute("INSERT INTO ingresso (cod_cliente, cod_tipo_ingresso, cod_pagamento,  valor_ingresso, cod_dependente, cal_data) VALUES (%s, %s, %s, %s, %s, %s);",
-                    (values['-cod_cliente-'], values['-cod_tipo_ingresso-'], values['-cod_pagamento-'], 
-                     values['-valor_ingresso-'], values['-cod_dependente-'], 
-                     values['-cal_data-']))
-                ### VAI PRECISAR DE UM BIBLIOTECA QUE GERE UM PDF
-        limpar1()
+                    (values.get('-cod_cliente-', None),
+                    cod_tipo_ingresso,
+                    cod_pagamento,
+                    values.get('-valor_ingresso-', None),
+                    int(values.get('-cod_dependente-', None)) if values.get('-cod_dependente-', None) else None,
+                    values.get('-cal_data-', None),)
+                )
+                    
+        
+        limpar3()
     elif event == "-ATUALIZAR-":
         with con:
             with con.cursor() as cursor:
@@ -281,13 +379,14 @@ while True:
     elif event == "-PROCURAR-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("SELECT nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE nome_cliente LIKE %s;",
+                cursor.execute("SELECT nome_cliente, cpf_cliente, data_nasci_cliente, email_cliente, telefone_cliente, sexo_cliente, cep,rua_num_cliente, uf, cidade, bairro FROM cliente WHERE nome_cliente LIKE %s;",
                     ('%'+values['-nome_cliente-']+'%',))
                 resposta2 = cursor.fetchall()
                 print(resposta2)
                 lista2.clear()
                 for i in range(len(resposta2)):
                     lista2.append( list(resposta2[i]) )
+                    lista2[i][5] = True if lista2[i][5] == 'M' else False
                 sg.popup('Quantidade de registros: ' + str(len(resposta2)))
                 indice2 = 0
                 atualiza2()
@@ -301,9 +400,52 @@ while True:
         indice2 -= 1
         if indice2 <= 0: indice2 = 0
         atualiza2()
+    
+    elif event == "-CADASTRAR3-":
+        with con:
+            with con.cursor() as cursor:
+                cursor.execute("INSERT INTO cliente (nome_dependente, cpf_dependente, data_nasci_dependente, sexo_dependente, cod_cliente) VALUES (  %s, %s, %s, %s, %s);",
+                            ( values['-nome_dependente-'], values['-cpf_dependente-'], values['-data_nasci_dependente-'], 
+                            values['-sexo_dependente-'], values['-cod_cliente-'] ))
 
-window1.close()
-window2.close()
+
+    elif event == "-PESQUISAR2-":
+        with con:
+            with con.cursor() as cursor:
+                cursor.execute("SELECT nome_cliente, cpf_cliente, data_nasci_cliente, email_cliente, telefone_cliente, sexo_cliente, cep,rua_num_cliente, uf, cidade, bairro FROM cliente WHERE nome_dependnete LIKE %s;",
+                    ('%'+values['-nome_cliente-']+'%',))
+                resposta3 = cursor.fetchall()
+                lista3.clear()
+                for i in range(len(resposta3)):
+                    lista3.append( list(resposta3[i]) )
+                if len(resposta3) == 0:
+                    sg.popup('Cliente não cadastrado')   ####Está dando um erro aqui - olhar 
+                elif len(resposta1) > 0:
+                    sg.popup('Cliente já cadatrado')
+                    atualiza3()
+                indice3 = 0
+                
+    elif event == "-PESQUISAR3-":
+        with con:
+            with con.cursor() as cursor:
+                cursor.execute("SELECT * FROM dependente WHERE nome_dependente LIKE %s;",
+                    ('%'+values['-nome_dependente-']+'%',))
+                resposta3 = cursor.fetchall()
+                lista3.clear()
+                for i in range(len(resposta3)):
+                    lista3.append( list(resposta3[i]) )
+                if len(resposta3) == 0:
+                    sg.popup('Cliente não cadastrado')   ####Está dando um erro aqui - olhar 
+                elif len(resposta3) > 0:
+                    sg.popup('Cliente já cadatrado')
+                    atualiza3()
+                indice3 = 0 
+    elif event == "-DEPENDENTE-":
+        window3 = make_win3()
+        window1.close()
+                
+window.close()
+
 # Fazer as mudanças para a base persistente
 con.commit()
 
