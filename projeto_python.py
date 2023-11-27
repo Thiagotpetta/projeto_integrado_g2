@@ -200,6 +200,9 @@ def make_win1():
     layout = [    
 
         [
+             sg.Image(f'imagens/logo_marca.png')
+        ],
+        [
             sg.Text("Código do cliente:", size=(20, 1)),
             sg.InputText(size=(6, 1), key="-cod_cliente-", focus=False)
         ],
@@ -243,13 +246,16 @@ def make_win1():
         
     ]
 
-    return sg.Window('Cadastrinho...', layout, finalize=True, location=(100, 100))
+    return sg.Window('Exemplo de Imagem', layout, size=(1000, 450), finalize=True)
 
 
 
 
 def make_win2():
     layout = [    
+        [
+             sg.Image(f'imagens/turma_vertical.png')
+        ],
         [
             sg.Text("Nome:", size=(17, 1)),
             sg.InputText(size=(40, 1), key="-nome_cliente-", focus=True)
@@ -310,7 +316,7 @@ def make_win2():
             sg.Button('>>', size=(8, 1), key="->>-")
         ]
     ]
-    return sg.Window("Cadastlo do cebola", layout, finalize=True, location=(100, 100))
+    return sg.Window("Cadastlo do cebola", layout,size=(1000, 450), finalize=True, location=(100, 100))
 
 def make_win3():
  
