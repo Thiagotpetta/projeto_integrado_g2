@@ -341,51 +341,61 @@ def make_win2():
 
 def make_win3():
  
-    
-    layout = [    
-        [
-            sg.Push(), sg.Text("CADASTRO DE DEPENDENTE"), sg.Push()
-            
-        ],
-        [
-            sg.Text("Código do cliente:", size=(20, 1)),
-            sg.InputText(size=(40, 1), key="-cod_cliente-")
-        ],
-        [
-            sg.Text("Nome:", size=(20, 1)),
-            sg.InputText(size=(6, 1), key="-nome_dependente-", focus=False)      
-        ],
-        [
-            sg.Text("CPF:", size=(20, 1)),
-            sg.InputText(size=(6, 1), key="-cpf_dependente-", focus=False)
-        ],
-        [
-            sg.Text("Data de Nascimento:", size=(20, 1)),
-            sg.InputText(size=(40, 1), key="-data_nasci_dependente-", focus=True)
-        ],
-        [
-            sg.Text("Sexo:", size=(20, 1)),
-            sg.InputText(size=(40, 1), key="-sexo_dependente-")
-        ],
+    col1= [[sg.Image(f'imagens/personagens_vertical2.png') ]]
+    col2 = [   
         
-        [
-            sg.Push(), sg.Text("Pequise o código do cliente:"), sg.Push()
+         [
+            sg.Push(), sg.Text("Pequise o Código do Cliente:"), sg.Push()
             
         ],
         [
             sg.Text("CPF do cliente:", size=(20, 1)),
-            sg.InputText(size=(40, 1), key="-cpf_cliente-")
+            sg.InputText(size=(20, 1), key="-cpf_cliente-", focus = True),  sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR-")
+        ], 
+        [ sg.Text("", size=(20, 1))],
+        [sg.HorizontalSeparator()],
+        [
+            sg.Push(), sg.Text("Cadastro de Dependente:"), sg.Push()
+            
+        ],
+        [sg.HorizontalSeparator()],
+        [ sg.Text("", size=(20, 1))],
+        [
+            sg.Text("Código do cliente:", size=(20, 1)),
+            sg.InputText(size=(6, 1), key="-cod_cliente-")
         ],
         [
-            sg.Button('Cadastrar', size=(8, 1), key="-CADASTRAR2-"),
-            sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR-"),
-            sg.Button('Gerar Ingresso', size=(8, 1), key="-GERAR INGRESSO-"),
-            sg.Button('Emitir', size=(8, 1), key="-EMITIR3-")
+            sg.Text("Nome:", size=(20, 1)),
+            sg.InputText(size=(25, 1), key="-nome_dependente-", focus=False)      
+        ],
+        [
+            sg.Text("CPF:", size=(20, 1)),
+            sg.InputText(size=(20, 1), key="-cpf_dependente-", focus=False)
+        ],
+        [
+            sg.Text("Data de Nascimento:", size=(20, 1)),
+            sg.InputText(size=(20, 1), key="-data_nasci_dependente-", focus=False)
+        ],
+        [
+            sg.Text("Sexo:", size=(17, 1)),
+            sg.Radio('Masculino', 'GRUPO1', default=False, key="-sexo_dependente-M-"),
+            sg.Radio('Feminino', 'GRUPO1', default=True, key="-sexo_dependente-F-")
+            
+           
+        ],
+        
+        [ sg.Text("", size=(20, 1))],
+        [   sg.Push(),
+            sg.Button('Cadastrar', size=(8, 2), key="-CADASTRAR2-"),
+           
+           
+            sg.Button('Emitir Ingresso', size=(8, 2), key="-EMITIR3-"),sg.Push()
         ]
     ]
-    return sg.Window('Cadastlo do dependente...', layout, finalize=True, location=(100, 100))
+    layout = [[sg.Column(col1), sg.Column(col2, vertical_alignment='top')]]
+    return sg.Window('Cadastlo do dependente...', layout, size=(635, 380), finalize=True)
 
-window1, window2, window3 = make_win1(), None, None 
+window1, window2, window3 = make_win1(), None, None
 
 
 while True:
@@ -393,6 +403,7 @@ while True:
 
     if event == sg.WIN_CLOSED:
         break
+    
     elif event == "-CADASTRAR-":
         print('Cadastrar....')
         window2 = make_win2()
@@ -416,12 +427,12 @@ while True:
                 
                 
     elif event == "-EMITIR-":
-        print('Emitir....')
+        
         window1 = make_win1()
         window2.close()
     
     elif event == "-EMITIR3-":
-        print('Emitir....')
+        
         window1 = make_win1()
         window3.close()
                
@@ -542,8 +553,10 @@ while True:
     elif event == "-DEPENDENTE-":
         window3 = make_win3()
         window1.close()
-                
-window.close()
+
+window1.close()
+window2.close()                
+window3.close()
 
 # Fazer as mudanças para a base persistente
 con.commit()
