@@ -194,129 +194,150 @@ lista3=[]
 indice3 = 0
 
 
-import PySimpleGUI as sg
-
 def make_win1():
-    layout = [    
-
-        [
-             sg.Image(f'imagens/logo_marca.png')
-        ],
-        [
-            sg.Text("Código do cliente:", size=(20, 1)),
+    
+    col1 = [
+            [
+            sg.Text("Código do Cliente:", size=(20, 1)),
             sg.InputText(size=(6, 1), key="-cod_cliente-", focus=False)
         ],
         [
-            sg.Text("Tipo do ingresso:", size=(20, 1)),
+            sg.Text("Codigo do Dependete:", size=(20, 1)),
+            sg.InputText(size=(6, 1), key="-cod_dependente-")
+        ],
+        [
+            sg.Text("Tipo do Ingresso:", size=(20, 1)),
             sg.Combo(tipoingresso(), size=(13, 1), key="-cod_tipo_ingresso-") 
         ],
         [
-            sg.Text("Tipo de pagamento:", size=(20, 1)),
+            sg.Text("Tipo de Pagamento:", size=(20, 1)),
             sg.Combo(pagamentos(), size=(13, 1), key="-cod_pagamento-") 
         ],
         [
-            sg.Text("valor do ingresso:", size=(20, 1)),
-            sg.InputText(size=(40, 1), key="-valor_ingresso-")
+            sg.Text("Valor do Ingresso:", size=(20, 1)),
+            sg.InputText(size=(15, 1), key="-valor_ingresso-")
         ],
+        
         [
-            sg.Text("codigo do dependete:", size=(20, 1)),
-            sg.InputText(size=(40, 1), key="-cod_dependente-")
+            sg.Text("Data do Ingresso:", size=(20, 1)),
+            sg.InputText(size=(15, 1), key="-cal_data-")
         ],
-        [
-            sg.Text("Data:", size=(20, 1)),
-            sg.InputText(size=(40, 1), key="-cal_data-")
-        ],
-        [
-            sg.Push(), sg.Text("Pequise se o cliente e o dependente já está cadatrado:"), sg.Push()
-            
-        ],
-        [
-            sg.Text("Nome do cliente:", size=(20, 1)),
-            sg.InputText(size=(40, 1), key="-nome_cliente-"), sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR-")
-        ],
-        [
-            sg.Text("Nome do Dependente:", size=(20, 1)),
-            sg.InputText(size=(40, 1), key="-nome_dependente-"), sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR3-")
-        ],
-        [
-            sg.Button('Cadastrar', size=(8, 2), key="-CADASTRAR-"),
-            sg.Button('Gerar Ingresso', size=(8, 2), key="-GERAR INGRESSO-"),
-            sg.Button('Cadastrar Depedente', size=(8, 2), key="-DEPENDENTE-")
         ]
         
+    col2 =  [ 
+            [sg.Button('Cadastrar Cliente', size=(8, 2), key="-CADASTRAR-")],
+            [sg.Button('Gerar Ingresso', size=(8, 2), key="-GERAR INGRESSO-",button_color = 'red')],
+            [sg.Button('Cadastrar Depedente', size=(8, 2), key="-DEPENDENTE-")],
+            ]
+    
+    layout = [    
+        [
+             sg.Image(f'imagens/logo_marca.png')
+        ],
+       
+        [sg.HorizontalSeparator()],
+        [
+            sg.Push(), sg.Text("Pesquisa Se o Cliente e o Dependente Já Estão Cadastrados:"), sg.Push()
+            
+        ],
+        
+        [
+            sg.Text("CPF do Cliente:", size=(20, 1)),
+            sg.InputText(size=(20, 1), key="-nome_cliente-"), sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR-")
+        ],
+        [
+            sg.Text("CPF do Dependente:", size=(20, 1)),
+            sg.InputText(size=(20, 1), key="-nome_dependente-"), sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR3-")
+        ],
+        [
+            sg.Text("", size=(20, 1))
+        ],
+        [sg.HorizontalSeparator()],
+        [sg.Column(col1), sg.Push(), sg.Column(col2), sg.Push()]
     ]
+        
+        
 
-    return sg.Window('Exemplo de Imagem', layout, size=(1000, 450), finalize=True)
+    return sg.Window('Exemplo de Imagem', layout, size=(750, 480), finalize=True)
 
 
 
 
 def make_win2():
-    layout = [    
-        [
-             sg.Image(f'imagens/turma_vertical.png')
-        ],
-        [
+    col1 = [[sg.Image(f'imagens/cascao_vertical.png') ]]
+    col2 = [
+            [
             sg.Text("Nome:", size=(17, 1)),
-            sg.InputText(size=(40, 1), key="-nome_cliente-", focus=True)
-        ],
-        [
-            sg.Text("CPF:", size=(17, 1)),
-            sg.InputText(size=(40, 1), key="-cpf_cliente-")
-        ],
-        [
-            sg.Text("Data de Nascimento:", size=(17, 1)),
-            sg.InputText(size=(40, 1), key="-data_nasci_cliente-")
-        ],
-        [
-            sg.Text("E-mail:", size=(17, 1)),
-            sg.InputText(size=(40, 1), key="-email_cliente-")
-        ],
-        [
-            sg.Text("Telefone:", size=(17, 1)),
-            sg.InputText(size=(40, 1), key="-telefone_cliente-")
-        ], 
-        [
-            sg.Text("Sexo:", size=(17, 1)),
-            sg.Radio('Masculino', 'GRUPO1', default=False, key="-sexo_cliente-M-"),
-            sg.Radio('Feminino', 'GRUPO1', default=True, key="-sexo_cliente-F-")
-        ],
-        [
-            sg.Text("CEP:", size=(17, 1)),
-            sg.InputText(size=(40, 1), key="-cep-")
-        ],
-        [
-            sg.Text("Endereço:", size=(17, 1)),
-            sg.InputText(size=(40, 1), key="-rua_num_cliente-")
-        ],
-        [
-            sg.Text("Estado:", size=(17, 1)),
-            sg.Combo(uf(), size=(8, 1), key="-uf-")
-        ],
-        [
-            sg.Text("Cidade:", size=(17, 1)),
-            sg.InputText(size=(40, 1), key="-cidade-")
-        ],
-        [
-            sg.Text("Bairro:", size=(17, 1)),
-            sg.InputText(size=(40, 1), key="-bairro-")
-        ],
-        [
-            sg.Button('Limpar', size=(8, 1), key="-LIMPAR-"),
-            sg.Button('Inserir', size=(8, 1), key="-INSERIR-"),
-            sg.Button('Atualizar', size=(8, 1), key="-ATUALIZAR-"),
-            sg.Button('Emitir', size=(8, 1), key="-EMITIR-"),
-            sg.Button('Remover', size=(8, 1), key="-REMOVER-")
+            sg.InputText(size=(30, 1), key="-nome_cliente-", focus=True)
+            ],
+            [
+                sg.Text("CPF:", size=(17, 1)),
+                sg.InputText(size=(20, 1), key="-cpf_cliente-"), sg.Button('Procurar', size=(7, 1), key="-PROCURAR-")
+            ],
+            [
+                sg.Text("Data de Nascimento:", size=(17, 1)),
+                sg.InputText(size=(30, 1), key="-data_nasci_cliente-")
+            ],
+            [
+                sg.Text("E-mail:", size=(17, 1)),
+                sg.InputText(size=(30, 1), key="-email_cliente-")
+            ],
+            [
+                sg.Text("Telefone:", size=(17, 1)),
+                sg.InputText(size=(30, 1), key="-telefone_cliente-")
+            ], 
+            [
+                sg.Text("Sexo:", size=(17, 1)),
+                sg.Radio('Masculino', 'GRUPO1', default=False, key="-sexo_cliente-M-"),
+                sg.Radio('Feminino', 'GRUPO1', default=True, key="-sexo_cliente-F-")
+            ],
+            [
+                sg.Text("CEP:", size=(17, 1)),
+                sg.InputText(size=(20, 1), key="-cep-")
+            ],
+            [
+                sg.Text("Endereço:", size=(17, 1)),
+                sg.InputText(size=(30, 1), key="-rua_num_cliente-")
+            ],
+            [
+                sg.Text("Estado:", size=(17, 1)),
+                sg.Combo(uf(), size=(8, 1), key="-uf-")
+            ],
+            [
+                sg.Text("Cidade:", size=(17, 1)),
+                sg.InputText(size=(30, 1), key="-cidade-")
+            ],
+            [
+                sg.Text("Bairro:", size=(17, 1)),
+                sg.InputText(size=(30, 1), key="-bairro-")
+            ],
+            [sg.HorizontalSeparator()],
+            [sg.Text("", size=(17, 1))],
+            [ sg.Push(),
             
-        ],
-        [
-            sg.Button('<<', size=(8, 1), key="-<<-"),
-            sg.Button('Procurar', size=(8, 1), key="-PROCURAR-"),
-            sg.Button('Todos', size=(8, 1), key="-TODOS-"),
-            sg.Button('>>', size=(8, 1), key="->>-")
-        ]
-    ]
-    return sg.Window("Cadastlo do cebola", layout,size=(1000, 450), finalize=True, location=(100, 100))
+            sg.Button('Cadastrar', size=(13, 2), key="-INSERIR-"),
+            
+            sg.Button('Emitir', size=(13, 2), key="-EMITIR-"),
+            
+             sg.Push()
+            ],
+            [   sg.Push(),
+                sg.Button('Limpar', size=(8, 1), key="-LIMPAR-"),
+                sg.Button('Atualizar', size=(8, 1), key="-ATUALIZAR-"),
+                sg.Button('Remover', size=(8, 1), key="-REMOVER-"),  sg.Push()
+                
+            ],
+            [    sg.Push(),
+                sg.Button('<<', size=(8, 1), key="-<<-"),
+                sg.Button('Todos', size=(8, 1), key="-TODOS-"),
+                sg.Button('>>', size=(8, 1), key="->>-"),  sg.Push()
+               
+            ]
+            ]
+    
+    layout = [[sg.Column(col1), sg.Column(col2, vertical_alignment='top')]
+                ]
+    return sg.Window("Cadastlo do cebola",  layout, size = (630, 500), finalize=True)
 
 def make_win3():
  
@@ -457,8 +478,8 @@ while True:
     elif event == "-PROCURAR-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("SELECT nome_cliente, cpf_cliente, data_nasci_cliente, email_cliente, telefone_cliente, sexo_cliente, cep,rua_num_cliente, uf, cidade, bairro FROM cliente WHERE nome_cliente LIKE %s;",
-                    ('%'+values['-nome_cliente-']+'%',))
+                cursor.execute("SELECT nome_cliente, cpf_cliente, data_nasci_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, rua_num_cliente, uf, cidade, bairro FROM cliente WHERE cpf_cliente = %s;",
+                    (values['-cpf_cliente-'],))
                 resposta2 = cursor.fetchall()
                 print(resposta2)
                 lista2.clear()
