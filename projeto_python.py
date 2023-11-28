@@ -151,24 +151,23 @@ def gerar_qr_code_aleatorio():
     img.save(qr_buffer, format="PNG")
     return qr_buffer.getvalue()
 
-def criar_ingresso(data, preco, nome_comprador):
+def criar_ingresso(data, valor_ingresso):
     # Criar um objeto PDF
-    pdf_filename = f"{nome_comprador}.pdf"
-    c = canvas.Canvas(pdf_filename, pagesize=letter)
+    
+    c = canvas.Canvas('arquivo_ingresso.pdf', pagesize=letter)
 
     # Adicionar imagem ao ingresso (substitua 'seu_logo.png' pelo caminho da sua imagem)
-    imagem_logo = Image.open("seu_logo.jpg")
+    imagem_logo = Image.open(f'imagens/logo_marca.png')
     c.drawInlineImage(imagem_logo, 60, 700, width=500, height=90)
 
     # Adicionar informações ao ingresso
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(215, 670, "Parque da Mônica")
+    c.drawString(215, 670, "Nome do Evento")
     c.drawString(50, 630, f"Data: {data}")
-    c.drawString(50, 610, "Local: Av. das Nações Unidas, 22540 - ")
-    c.drawString(50, 590, "Jurubatuba, São Paulo - SP, 04795-000")
-    c.drawString(50, 570, f"Preço: R${preco}")
-    c.drawString(50, 550, f"Nome do Comprador: {nome_comprador}")
-
+    c.drawString(50, 610, "Local: Local do Evento")
+    c.drawString(50, 590, f"Preço: R${valor_ingresso}")
+    
+    
     # Adicionar um código de barras fictício (você pode substituir isso por um código de barras real)
     c.drawString(50, 520, "QRcode: ")
 
@@ -243,11 +242,11 @@ def make_win1():
         
         [
             sg.Text("CPF do Cliente:", size=(20, 1)),
-            sg.InputText(size=(20, 1), key="-nome_cliente-"), sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR-")
+            sg.InputText(size=(20, 1), key="-cpf_cliente-"), sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR-")
         ],
         [
             sg.Text("CPF do Dependente:", size=(20, 1)),
-            sg.InputText(size=(20, 1), key="-nome_dependente-"), sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR3-")
+            sg.InputText(size=(20, 1), key="-cpf_dependente-"), sg.Button('Pesquisar', size=(8, 1), key="-PESQUISAR3-")
         ],
         [
             sg.Text("", size=(20, 1))
@@ -411,8 +410,8 @@ while True:
     elif event == "-PESQUISAR-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("SELECT cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE nome_cliente LIKE %s;",
-                    ('%'+values['-nome_cliente-']+'%',))
+                cursor.execute("SELECT cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE cpf_cliente = %s;",
+                    (values['-cpf_cliente-'],))
                 resposta1 = cursor.fetchall()
                 lista1.clear()
                 for i in range(len(resposta1)):
@@ -460,14 +459,16 @@ while True:
                     values.get('-cal_data-', None),)
                 )
         # Adicione estas linhas para definir as variáveis
-            nome_cliente = values.get('-nome_cliente-', '')
-            tipo_ingresso = values.get('-cod_tipo_ingresso-', '')
-            valor_ingresso = values.get('-valor_ingresso-', '')
+         
+            
             data = values.get('-cal_data-', '')
-
-            # Agora, podemos chamar a função gerar_pdf
-            pdf_file = criar_ingresso(data, valor_ingresso, nome_cliente)
-        sg.popup(f'Ingresso gerado com sucesso: {pdf_file}')
+            valor_ingresso = values.get('-valor_ingresso-', '') 
+            
+            print( data, valor_ingresso)
+            pdf_filename = (data, valor_ingresso)
+            sg.popup(f'Ingresso gerado com sucesso: {pdf_filename}')
+            
+         
         limpar1()
     elif event == "-ATUALIZAR-":
         with con:
@@ -489,8 +490,7 @@ while True:
     elif event == "-PROCURAR-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("SELECT nome_cliente, cpf_cliente, data_nasci_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, rua_num_cliente, uf, cidade, bairro FROM cliente WHERE cpf_cliente = %s;",
-                    (values['-cpf_cliente-'],))
+                cursor.execute("SELECT nome_cliente, cpf_cliente, data_nasci_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, rua_num_cliente, uf, cidade, bairro FROM cliente WHERE cpf_cliente = %s;", (values['-cpf_cliente-'],))
                 resposta2 = cursor.fetchall()
                 print(resposta2)
                 lista2.clear()
@@ -514,7 +514,7 @@ while True:
     elif event == "-CADASTRAR3-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("INSERT INTO cliente (nome_dependente, cpf_dependente, data_nasci_dependente, sexo_dependente, cod_cliente) VALUES (  %s, %s, %s, %s, %s);",
+                cursor.execute("INSERT INTO dependente (nome_dependente, cpf_dependente, data_nasci_dependente, sexo_dependente, cod_cliente) VALUES (  %s, %s, %s, %s, %s);",
                             ( values['-nome_dependente-'], values['-cpf_dependente-'], values['-data_nasci_dependente-'], 
                             values['-sexo_dependente-'], values['-cod_cliente-'] ))
 
@@ -526,6 +526,7 @@ while True:
                     ('%'+values['-nome_cliente-']+'%',))
                 resposta3 = cursor.fetchall()
                 lista3.clear()
+                
                 for i in range(len(resposta3)):
                     lista3.append( list(resposta3[i]) )
                 if len(resposta3) == 0:
@@ -538,8 +539,8 @@ while True:
     elif event == "-PESQUISAR3-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("SELECT * FROM dependente WHERE nome_dependente LIKE %s;",
-                    ('%'+values['-nome_dependente-']+'%',))
+                cursor.execute("SELECT * FROM dependente WHERE cpf_dependente = %s;",
+                    (values['-cpf_dependente-'],))
                 resposta3 = cursor.fetchall()
                 lista3.clear()
                 for i in range(len(resposta3)):
