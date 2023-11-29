@@ -105,8 +105,8 @@ def todos():
 
 
 def uf():
-    return['AC ', 'AL', 'AP', 'AM', 'BA', 'CE' , 'DF', 'ES', 'GO', 'MA', 'MT' , 
-           'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
+     return['AC ', 'AL', 'AP', 'AM', 'BA', 'CE' , 'DF', 'ES', 'GO', 'MA', 'MT' , 
+             'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
 
 
 # Inicialização BD
@@ -151,33 +151,35 @@ def gerar_qr_code_aleatorio():
     img.save(qr_buffer, format="PNG")
     return qr_buffer.getvalue()
 
-def criar_ingresso(data, valor_ingresso):
+def criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso):
     # Criar um objeto PDF
-    
-    c = canvas.Canvas('arquivo_ingresso.pdf', pagesize=letter)
+    pdfname = f"{num_ingresso}{nome_cliente}.pdf"
+    c = canvas.Canvas(pdfname, pagesize=letter)
 
     # Adicionar imagem ao ingresso (substitua 'seu_logo.png' pelo caminho da sua imagem)
-    imagem_logo = Image.open(f'imagens/logo_marca.png')
+    imagem_logo = Image.open(f'imagens/turma-da-monica.png')
     c.drawInlineImage(imagem_logo, 60, 700, width=500, height=90)
 
     # Adicionar informações ao ingresso
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(215, 670, "Nome do Evento")
-    c.drawString(50, 630, f"Data: {data}")
-    c.drawString(50, 610, "Local: Local do Evento")
-    c.drawString(50, 590, f"Preço: R${valor_ingresso}")
+    c.drawString(215, 600, "Parque da Turma da Mônica")
+    c.drawString(50, 580, f"Data: {data}")
+    c.drawString(50, 560, "Local: Avenida Nações Unidas, 22540 - Jurubatuba - SP")
+    c.drawString(50, 540, "Shopping SP MARKET")
+    c.drawString(50, 520, f"Preço: R${valor_ingresso}")
+    c.drawString(50, 500, f"Nome:{nome_cliente}")
     
     
     # Adicionar um código de barras fictício (você pode substituir isso por um código de barras real)
-    c.drawString(50, 520, "QRcode: ")
+    c.drawString(50, 460, "QRcode: ")
 
     # Adicionar o QR Code ao PDF
     qr_content = gerar_qr_code_aleatorio()
     qr_image = Image.open(io.BytesIO(qr_content))
-    c.drawInlineImage(qr_image, 50, 350, width=150, height=150)
+    c.drawInlineImage(qr_image, 50, 300, width=150, height=150)
 
     # Adicionar linha de corte
-    c.line(50, 330, 200, 330)
+    c.line(50, 290, 200, 290)
 
     # Salvar o PDF
     c.save()
@@ -407,6 +409,7 @@ while True:
         print('Cadastrar....')
         window2 = make_win2()
         window1.close()
+     
     elif event == "-PESQUISAR-":
         with con:
             with con.cursor() as cursor:
@@ -457,15 +460,25 @@ while True:
                     values.get('-valor_ingresso-', None),
                     int(values.get('-cod_dependente-', None)) if values.get('-cod_dependente-', None) else None,
                     values.get('-cal_data-', None),)
-                )
+                ),
+                cursor.execute ("SELECT nome_cliente FROM cliente WHERE cod_cliente = %s;",
+                    (values.get('-cod_cliente-',''),))
+                valor = cursor.fetchall()[0][0]
+                print(valor)
+                
+                cursor.execute ("SELECT num_ingresso FROM ingresso WHERE cod_cliente = %s ORDER BY num_ingresso DESC;",
+                    (values.get('-cod_cliente-',''),))
+                valor2 = cursor.fetchall()[0][0]
+                
+                
         # Adicione estas linhas para definir as variáveis
          
-            
+            num_ingresso = valor2
             data = values.get('-cal_data-', '')
             valor_ingresso = values.get('-valor_ingresso-', '') 
-            
-            print( data, valor_ingresso)
-            pdf_filename = (data, valor_ingresso)
+            nome_cliente = valor
+            print( data, valor_ingresso, nome_cliente, num_ingresso)
+            pdf_filename = criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso)
             sg.popup(f'Ingresso gerado com sucesso: {pdf_filename}')
             
          
@@ -555,9 +568,9 @@ while True:
         window3 = make_win3()
         window1.close()
 
-window1.close()
-window2.close()                
-window3.close()
+if window1 != None: window1.close()
+if window2 != None: window2.close()                
+if window3 != None: window3.close()
 
 # Fazer as mudanças para a base persistente
 con.commit()
