@@ -147,12 +147,13 @@ def gerar_qr_code_aleatorio():
     img.save(qr_buffer, format="PNG")
     return qr_buffer.getvalue()
 
-def criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso):
+def criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso, nome_dependente=None):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     diretorio_ingressos = os.path.join(script_dir, "ingressos")
     if not os.path.exists(diretorio_ingressos):
         os.makedirs(diretorio_ingressos)
-    pdfname = f"{num_ingresso}{nome_cliente}.pdf"
+    
+    pdfname = f"{num_ingresso}_{nome_dependente or ''}_{nome_cliente}.pdf"
     pdf_path = os.path.join(diretorio_ingressos, pdfname)
     c = canvas.Canvas(pdf_path, pagesize=letter)
     
@@ -160,14 +161,17 @@ def criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso):
     c.drawInlineImage(imagem_logo, 60, 700, width=500, height=90)
     
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(215, 600, "Parque da Turma da Mônica")
-    c.drawString(50, 580, f"Data: {data}")
-    c.drawString(50, 560, "Local: Avenida Nações Unidas, 22540 - Jurubatuba - SP")
-    c.drawString(50, 540, "Shopping SP MARKET")
-    c.drawString(50, 520, f"Preço: R${valor_ingresso}")
-    c.drawString(50, 500, f"Nome:{nome_cliente}")
+    c.drawString(215, 650, "Parque da Turma da Mônica")
+    c.drawString(50, 610, f"Data: {data}")
+    c.drawString(50, 590, "Local: Avenida Nações Unidas, 22540 - Jurubatuba - SP")
+    c.drawString(50, 570, "Shopping SP MARKET")
+    c.drawString(50, 550, f"Preço: R${valor_ingresso}")
+    c.drawString(50, 530, f"Nome do cliente: {nome_cliente}")
+
+    if nome_dependente is not None:
+        c.drawString(50, 510, f"Nome do dependente: {nome_dependente}")
     
-    c.drawString(50, 460, "QRcode: ")
+    c.drawString(50, 490, "QRcode: ")
     qr_content = gerar_qr_code_aleatorio()
     qr_image = Image.open(io.BytesIO(qr_content))
     c.drawInlineImage(qr_image, 50, 300, width=150, height=150)
@@ -439,7 +443,7 @@ while True:
                 data_ingresso = values.get('-cal_data-', None)
                 if data_ingresso:
                     data_ingresso = datetime.datetime.strptime(data_ingresso, '%d/%m/%Y').date()
-                    limite_diario = 300   ## fazer um count/max e verificar o maior valor 
+                    limite_diario = 60
                     cursor.execute("SELECT COUNT(*) FROM ingresso WHERE cal_data = %s;", (data_ingresso,))
                     total_ingressos_result = cursor.fetchone()
                     total_ingressos = total_ingressos_result[0] if total_ingressos_result else 0      
@@ -468,32 +472,35 @@ while True:
                         cursor.execute ("SELECT nome_cliente FROM cliente WHERE cod_cliente = %s;",
                             (values.get('-cod_cliente-',''),))
                         valor = cursor.fetchall()[0][0]
-                        print(valor)
                         
+                        cursor.execute ("SELECT nome_dependente FROM dependente WHERE cod_dependente = %s;",
+                            (values.get('-cod_dependente-', None),) if values.get('-cod_dependente-', None) else (None,))
+                        valor_dependente_result = cursor.fetchall()
+                        valor_dependente = valor_dependente_result[0][0] if valor_dependente_result else None
+                    
                         cursor.execute ("SELECT num_ingresso FROM ingresso WHERE cod_cliente = %s ORDER BY num_ingresso DESC;",
                             (values.get('-cod_cliente-',''),))
                         valor2 = cursor.fetchall()[0][0]
 
-                        
+                        nome_dependente = valor_dependente
                         num_ingresso = valor2
                         data = values.get('-cal_data-', '')
                         valor_ingresso = values.get('-valor_ingresso-', '') 
                         nome_cliente = valor
-                        print( data, valor_ingresso, nome_cliente, num_ingresso)
-                        # pdf_filename = criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso)
-                        criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso)
+                        print( data, valor_ingresso, nome_cliente, num_ingresso, nome_dependente)
+                        criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso, nome_dependente)
                         sg.popup(f'Ingresso gerado com sucesso. O valor a ser pago é: {valor_ingresso} R$')
         limpar1()
-        
+        ##precisa arrumar aqui
     elif event == "-ATUALIZAR-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("UPDATE cliente SET nome_cliente = %s, cpf_cliente = %s, cpf_cliente = %s, cpf_cliente = %s, cpf_cliente = %s, cpf_cliente = %s, cep = %s, uf = %s, cidade = %s, bairro = %s WHERE cod_cliente = %s",
-                    (values['-nome_cliente-'], values['-cpf_cliente-'], values['-data_nasci_cliente-'], values['-end_cliente-'], 
-                     values['-email_cliente-'], values['-telefone_cliente-'], values['-genero-'], values['-cod_cliente-']))
-        lista2[indice2] = [values['-cod_cliente-'], values['-nome_cliente-'], values['-cpf_cliente-'], 
-                         values['-data_nasci_cliente-'], values['-end_cliente-'], values['-email_cliente-'], values['-telefone_cliente-'], 
-                         ('M' if values['-sexo_cliente-M-'] else 'F'), values['-cep-'], values['-uf-'], values['-cidade-'], values['-bairro-']]  
+                cursor.execute("UPDATE cliente SET nome_cliente = %s,cpf_cliente = %s, data_nasci_cliente = %s, email_cliente = %s, telefone_cliente = %s, sexo_cliente = %s, cep = %s, rua_num_cliente = %s, uf = %s, cidade = %s, bairro = %s WHERE cod_cliente = %s",
+                    (values['-nome_cliente-'], values['-cpf_cliente-'], values['-data_nasci_cliente-'], 
+                     values['-email_cliente-'], values['-telefone_cliente-'], values['-sexo_cliente-'], values['-cep-'], values['-rua_num_cliente-'], values['-uf-'],values['-cidade-'],values['-bairro-'],  values['-cod_cliente-']))
+        lista2[indice2] = [values['-cod_cliente-'], values['-nome_cliente-'], values['-cpf_cliente-'], values['-data_nasci_cliente-'], 
+                     values['-email_cliente-'], values['-telefone_cliente-'], 
+                         ('M' if values['-sexo_cliente-M-'] else 'F'), values['-cep-'], values['-rua_num_cliente-'], values['-uf-'], values['-cidade-'], values['-bairro-']]  
        
     elif event == "-REMOVER-":
         with con:
@@ -561,9 +568,9 @@ while True:
                 for i in range(len(resposta3)):
                     lista3.append( list(resposta3[i]) )
                 if len(resposta3) == 0:
-                    sg.popup('Cliente não cadastrado')  
+                    sg.popup('Dependente não cadastrado')  
                 elif len(resposta3) > 0:
-                    sg.popup('Cliente já cadatrado')
+                    sg.popup('Dependente já cadatrado')
                     atualiza3()
                 indice3 = 0 
     
