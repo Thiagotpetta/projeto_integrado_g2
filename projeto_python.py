@@ -7,12 +7,37 @@ import qrcode
 import random
 import string
 import io
-
+import os
+import datetime
 
 sg.theme('DarkAmber') 
 
 con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2', 
                        user = 'postgres', password = 'thor1234')
+
+
+
+lista1=[]
+indice1 = 0
+
+lista2=[]
+indice2 = 0
+
+lista3=[]
+indice3 = 0
+
+dicTipoIngresso= {'GESTANTE': 1, 'IDOSO': 2, 'COMUM': 3}
+
+dicPagamentos={'PIX':1, 'CRÉDITO':2, 'DÉBITO': 3, 'DINHEIRO': 4, 'GRATUIDADE':5 }
+
+def limpar1():
+    
+    window['-cod_cliente-'].update('')
+    window['-cod_tipo_ingresso-'].update('')
+    window['-cod_pagamento-'].update('')
+    window['-valor_ingresso-'].update('')
+    window['-cod_dependente-'].update('')
+    window['-cal_data-'].update('')
 
 
 def limpar2():
@@ -30,15 +55,6 @@ def limpar2():
     window['-bairro-'].update('')
 
 
-def limpar1():
-    
-    window['-cod_cliente-'].update('')
-    window['-cod_tipo_ingresso-'].update('')
-    window['-cod_pagamento-'].update('')
-    window['-valor_ingresso-'].update('')
-    window['-cod_dependente-'].update('')
-    window['-cal_data-'].update('')
-
 def limpar3():
     
     window['-nome_dependente-'].update('')
@@ -46,15 +62,19 @@ def limpar3():
     window['-data_nasci_dependente-'].update('')
     window['-sexo_dependente-'].update('')
     window['-cod_cliente-'].update('')
-   
-    
+     
+
+def atualiza1():
+    if len(lista1) == 0:
+        limpar1()
+    else:
+        window['-cod_cliente-'].update( lista1[indice1][0])
 
     
 def atualiza2():
     if len(lista2) == 0:
         limpar2()
     else:
-        
         window['-nome_cliente-'].update( lista2[indice2][0] )
         window['-cpf_cliente-'].update( lista2[indice2][1] )
         window['-data_nasci_cliente-'].update( lista2[indice2][2] )
@@ -70,13 +90,6 @@ def atualiza2():
         window['-cidade-'].update( lista2[indice2][9] )
         window['-bairro-'].update( lista2[indice2][10] )
         
-
-
-def atualiza1():
-    if len(lista1) == 0:
-        limpar1()
-    else:
-        window['-cod_cliente-'].update( lista1[indice1][0])
 
 def atualiza3():
     if len(lista3) == 0:
@@ -109,58 +122,43 @@ def uf():
              'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
 
 
-# Inicialização BD
-con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2', 
-                       user = 'postgres', password = 'thor1234')
 
-
-## aqui é o modo de: escrevo uma coisa e ele lê outra
-dicPagamentos={'PIX':1, 'CRÉDITO':2, 'DÉBITO': 3, 'DINHEIRO': 4, 'GRATUIDADE':5 }
 
 def pagamentos():
     return ['PIX', 'CRÉDITO', 'DÉBITO', 'DINHEIRO', 'GRATUIDADE']
-
-
-dicTipoIngresso= {'GESTANTE': 1, 'IDOSO': 2, 'COMUM': 3}
 
 def tipoingresso():
     return ['GESTANTE', 'IDOSO', 'COMUM']
 
 
 def gerar_qr_code_aleatorio():
-    # Gerar uma string aleatória para o conteúdo do QR Code
     conteudo_qr = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-
-    # Criar um objeto QR Code
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=10,
         border=4,
     )
-
-    # Adicionar os dados ao QR Code
     qr.add_data(conteudo_qr)
     qr.make(fit=True)
 
-    # Criar uma imagem do QR Code
     img = qr.make_image(fill_color="black", back_color="white")
-
-    # Retornar o conteúdo do QR Code como bytes
     qr_buffer = io.BytesIO()
     img.save(qr_buffer, format="PNG")
     return qr_buffer.getvalue()
 
 def criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso):
-    # Criar um objeto PDF
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    diretorio_ingressos = os.path.join(script_dir, "ingressos")
+    if not os.path.exists(diretorio_ingressos):
+        os.makedirs(diretorio_ingressos)
     pdfname = f"{num_ingresso}{nome_cliente}.pdf"
-    c = canvas.Canvas(pdfname, pagesize=letter)
-
-    # Adicionar imagem ao ingresso (substitua 'seu_logo.png' pelo caminho da sua imagem)
+    pdf_path = os.path.join(diretorio_ingressos, pdfname)
+    c = canvas.Canvas(pdf_path, pagesize=letter)
+    
     imagem_logo = Image.open(f'imagens/turma-da-monica.png')
     c.drawInlineImage(imagem_logo, 60, 700, width=500, height=90)
-
-    # Adicionar informações ao ingresso
+    
     c.setFont("Helvetica-Bold", 16)
     c.drawString(215, 600, "Parque da Turma da Mônica")
     c.drawString(50, 580, f"Data: {data}")
@@ -169,30 +167,13 @@ def criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso):
     c.drawString(50, 520, f"Preço: R${valor_ingresso}")
     c.drawString(50, 500, f"Nome:{nome_cliente}")
     
-    
-    # Adicionar um código de barras fictício (você pode substituir isso por um código de barras real)
     c.drawString(50, 460, "QRcode: ")
-
-    # Adicionar o QR Code ao PDF
     qr_content = gerar_qr_code_aleatorio()
     qr_image = Image.open(io.BytesIO(qr_content))
     c.drawInlineImage(qr_image, 50, 300, width=150, height=150)
-
-    # Adicionar linha de corte
     c.line(50, 290, 200, 290)
-
-    # Salvar o PDF
     c.save()
 
-lista2=[]
-indice2 = 0
-
-
-lista1=[]
-indice1 = 0
-
-lista3=[]
-indice3 = 0
 
 
 def make_win1():
@@ -340,6 +321,7 @@ def make_win2():
                 ]
     return sg.Window("Cadastlo do cebola",  layout, size = (630, 500), finalize=True)
 
+
 def make_win3():
  
     col1= [[sg.Image(f'imagens/personagens_vertical2.png') ]]
@@ -420,7 +402,7 @@ while True:
                 for i in range(len(resposta1)):
                     lista1.append( list(resposta1[i]) )
                 if len(resposta1) == 0:
-                    sg.popup('Cliente não cadastrado')   ####Está dando um erro aqui - olhar 
+                    sg.popup('Cliente não cadastrado')   
                 elif len(resposta1) > 0:
                     sg.popup('Cliente já cadatrado')
                     atualiza1()
@@ -448,41 +430,61 @@ while True:
             limpar2()
     elif event == "-LIMPAR-":
         limpar2()
+    
     elif event == "-GERAR INGRESSO-":    
         with con:
             with con.cursor() as cursor:
                 cod_pagamento = dicPagamentos.get(values.get('-cod_pagamento-', ''), None)
                 cod_tipo_ingresso = dicTipoIngresso.get(values.get('-cod_tipo_ingresso-', ''), None)
-                cursor.execute("INSERT INTO ingresso (cod_cliente, cod_tipo_ingresso, cod_pagamento,  valor_ingresso, cod_dependente, cal_data) VALUES (%s, %s, %s, %s, %s, %s);",
-                    (values.get('-cod_cliente-', None),
-                    cod_tipo_ingresso,
-                    cod_pagamento,
-                    values.get('-valor_ingresso-', None),
-                    int(values.get('-cod_dependente-', None)) if values.get('-cod_dependente-', None) else None,
-                    values.get('-cal_data-', None),)
-                ),
-                cursor.execute ("SELECT nome_cliente FROM cliente WHERE cod_cliente = %s;",
-                    (values.get('-cod_cliente-',''),))
-                valor = cursor.fetchall()[0][0]
-                print(valor)
+                data_ingresso = values.get('-cal_data-', None)
+                if data_ingresso:
+                    data_ingresso = datetime.datetime.strptime(data_ingresso, '%d/%m/%Y').date()
+                    limite_diario = 300   ## fazer um count/max e verificar o maior valor 
+                    cursor.execute("SELECT COUNT(*) FROM ingresso WHERE cal_data = %s;", (data_ingresso,))
+                    total_ingressos_result = cursor.fetchone()
+                    total_ingressos = total_ingressos_result[0] if total_ingressos_result else 0      
                 
-                cursor.execute ("SELECT num_ingresso FROM ingresso WHERE cod_cliente = %s ORDER BY num_ingresso DESC;",
-                    (values.get('-cod_cliente-',''),))
-                valor2 = cursor.fetchall()[0][0]
-                
-                
-        # Adicione estas linhas para definir as variáveis
-         
-            num_ingresso = valor2
-            data = values.get('-cal_data-', '')
-            valor_ingresso = values.get('-valor_ingresso-', '') 
-            nome_cliente = valor
-            print( data, valor_ingresso, nome_cliente, num_ingresso)
-            pdf_filename = criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso)
-            sg.popup(f'Ingresso gerado com sucesso: {pdf_filename}')
-            
-         
+                    cursor.execute("SELECT cal_data  FROM calendario WHERE situacao_data ILIKE 'INATIVO' AND cal_data = %s AND cal_data IN (SELECT cal_data FROM calendario WHERE situacao_data ILIKE 'INATIVO');", (data_ingresso,))
+                    data_inativa_result = cursor.fetchone()
+                    data_inativa = data_inativa_result[0] if data_inativa_result else None      
+                    
+                    
+                    if total_ingressos >= limite_diario:
+                        sg.popup("Limite diário de ingressos atingido para esta data. Venda não permitida.")
+                    
+                    elif data_ingresso == data_inativa:
+                        sg.popup("O parque não abrirá na data informada")
+                    
+                    
+                    else:
+                        cursor.execute("INSERT INTO ingresso (cod_cliente, cod_tipo_ingresso, cod_pagamento,  valor_ingresso, cod_dependente, cal_data) VALUES (%s, %s, %s, %s, %s, %s);",
+                            (values.get('-cod_cliente-', None),
+                            cod_tipo_ingresso,
+                            cod_pagamento,
+                            values.get('-valor_ingresso-', None),
+                            int(values.get('-cod_dependente-', None)) if values.get('-cod_dependente-', None) else None,
+                            values.get('-cal_data-', None),)
+                        ),
+                        cursor.execute ("SELECT nome_cliente FROM cliente WHERE cod_cliente = %s;",
+                            (values.get('-cod_cliente-',''),))
+                        valor = cursor.fetchall()[0][0]
+                        print(valor)
+                        
+                        cursor.execute ("SELECT num_ingresso FROM ingresso WHERE cod_cliente = %s ORDER BY num_ingresso DESC;",
+                            (values.get('-cod_cliente-',''),))
+                        valor2 = cursor.fetchall()[0][0]
+
+                        
+                        num_ingresso = valor2
+                        data = values.get('-cal_data-', '')
+                        valor_ingresso = values.get('-valor_ingresso-', '') 
+                        nome_cliente = valor
+                        print( data, valor_ingresso, nome_cliente, num_ingresso)
+                        # pdf_filename = criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso)
+                        criar_ingresso(data, valor_ingresso, nome_cliente, num_ingresso)
+                        sg.popup(f'Ingresso gerado com sucesso. O valor a ser pago é: {valor_ingresso} R$')
         limpar1()
+        
     elif event == "-ATUALIZAR-":
         with con:
             with con.cursor() as cursor:
@@ -543,7 +545,7 @@ while True:
                 for i in range(len(resposta3)):
                     lista3.append( list(resposta3[i]) )
                 if len(resposta3) == 0:
-                    sg.popup('Cliente não cadastrado')   ####Está dando um erro aqui - olhar 
+                    sg.popup('Cliente não cadastrado')  
                 elif len(resposta1) > 0:
                     sg.popup('Cliente já cadatrado')
                     atualiza3()
@@ -559,11 +561,12 @@ while True:
                 for i in range(len(resposta3)):
                     lista3.append( list(resposta3[i]) )
                 if len(resposta3) == 0:
-                    sg.popup('Cliente não cadastrado')   ####Está dando um erro aqui - olhar 
+                    sg.popup('Cliente não cadastrado')  
                 elif len(resposta3) > 0:
                     sg.popup('Cliente já cadatrado')
                     atualiza3()
                 indice3 = 0 
+    
     elif event == "-DEPENDENTE-":
         window3 = make_win3()
         window1.close()
