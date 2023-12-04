@@ -10,7 +10,7 @@ import io
 import os
 import datetime
 
-sg.theme('DarkAmber') 
+sg.theme('DarkBrown5') 
 
 con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2', 
                        user = 'postgres', password = 'thor1234')
@@ -118,8 +118,12 @@ def todos():
 
 
 def uf():
-     return['AC ', 'AL', 'AP', 'AM', 'BA', 'CE' , 'DF', 'ES', 'GO', 'MA', 'MT' , 
+    return['AC ', 'AL', 'AP', 'AM', 'BA', 'CE' , 'DF', 'ES', 'GO', 'MA', 'MT' , 
              'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
+     
+
+def preco():
+    return [130.50, 65.25, 0]
 
 
 
@@ -201,9 +205,8 @@ def make_win1():
         ],
         [
             sg.Text("Valor do Ingresso:", size=(20, 1)),
-            sg.InputText(size=(15, 1), key="-valor_ingresso-")
+            sg.Combo(preco(), size=(10, 1), key="-valor_ingresso-")
         ],
-        
         [
             sg.Text("Data do Ingresso:", size=(20, 1)),
             sg.InputText(size=(15, 1), key="-cal_data-")
@@ -392,25 +395,43 @@ while True:
         break
     
     elif event == "-CADASTRAR-":
-        print('Cadastrar....')
+        
         window2 = make_win2()
         window1.close()
      
     elif event == "-PESQUISAR-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("SELECT cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE cpf_cliente = %s;",
-                    (values['-cpf_cliente-'],))
-                resposta1 = cursor.fetchall()
-                lista1.clear()
-                for i in range(len(resposta1)):
-                    lista1.append( list(resposta1[i]) )
-                if len(resposta1) == 0:
-                    sg.popup('Cliente não cadastrado')   
-                elif len(resposta1) > 0:
-                    sg.popup('Cliente já cadatrado')
-                    atualiza1()
-                indice1 = 0
+                # cursor.execute("SELECT cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE cpf_cliente = %s;",
+                #     (values['-cpf_cliente-'],))
+                # resposta1 = cursor.fetchall()
+                # lista1.clear()
+                # for i in range(len(resposta1)):
+                #     lista1.append( list(resposta1[i]) )
+                # if len(resposta1) == 0:
+                #     sg.popup('Cliente não cadastrado')   
+                # elif len(resposta1) > 0:
+                #     sg.popup('Cliente já cadatrado')
+                #     atualiza1()
+                # indice1 = 0
+                try:
+                    cpf_cliente = int(values['-cpf_cliente-'])
+                    
+                    cursor.execute("SELECT cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE cpf_cliente = %s;",
+                     (values['-cpf_cliente-'],))
+                    resposta1 = cursor.fetchall()
+                    lista1.clear()
+                    for i in range(len(resposta1)):
+                        lista1.append( list(resposta1[i]) )
+                    if len(resposta1) == 0:
+                        sg.popup('Cliente não cadastrado')   
+                    elif len(resposta1) > 0:
+                        sg.popup('Cliente já cadastrado')
+                        atualiza1()
+                    indice1 = 0
+                
+                except ValueError:
+                    sg.popup_error('Por favor, insira um CPF válido.')
             
                 
                 
@@ -432,6 +453,7 @@ while True:
                             values['-rua_num_cliente-'], values['-email_cliente-'], values['-telefone_cliente-'], ('M' if values['-sexo_cliente-M-'] else 'F'), 
                             values['-cep-'], values['-uf-'], values['-cidade-'], values['-bairro-']))
             limpar2()
+
     elif event == "-LIMPAR-":
         limpar2()
     
@@ -495,17 +517,18 @@ while True:
     elif event == "-ATUALIZAR-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("UPDATE cliente SET nome_cliente = %s,cpf_cliente = %s, data_nasci_cliente = %s, email_cliente = %s, telefone_cliente = %s, sexo_cliente = %s, cep = %s, rua_num_cliente = %s, uf = %s, cidade = %s, bairro = %s WHERE cod_cliente = %s",
-                    (values['-nome_cliente-'], values['-cpf_cliente-'], values['-data_nasci_cliente-'], 
-                     values['-email_cliente-'], values['-telefone_cliente-'], values['-sexo_cliente-'], values['-cep-'], values['-rua_num_cliente-'], values['-uf-'],values['-cidade-'],values['-bairro-'],  values['-cod_cliente-']))
-        lista2[indice2] = [values['-cod_cliente-'], values['-nome_cliente-'], values['-cpf_cliente-'], values['-data_nasci_cliente-'], 
+                cursor.execute("UPDATE cliente SET nome_cliente = %s, data_nasci_cliente = %s, email_cliente = %s, telefone_cliente = %s, sexo_cliente = %s, cep = %s, rua_num_cliente = %s, uf = %s, cidade = %s, bairro = %s WHERE cpf_cliente = %s",
+                    (values['-nome_cliente-'], values['-data_nasci_cliente-'], 
+                     values['-email_cliente-'], values['-telefone_cliente-'], 'M' if values['-sexo_cliente-M-'] else 'F', values['-cep-'], values['-rua_num_cliente-'], values['-uf-'],values['-cidade-'],values['-bairro-'], lista2[indice2][1]))
+        lista2[indice2] = [ lista2[indice2][1], values['-nome_cliente-'], values['-data_nasci_cliente-'], 
                      values['-email_cliente-'], values['-telefone_cliente-'], 
-                         ('M' if values['-sexo_cliente-M-'] else 'F'), values['-cep-'], values['-rua_num_cliente-'], values['-uf-'], values['-cidade-'], values['-bairro-']]  
-       
+                         values['-sexo_cliente-M-'], values['-cep-'], values['-rua_num_cliente-'], values['-uf-'], values['-cidade-'], values['-bairro-']]  
+        limpar2()
+        
     elif event == "-REMOVER-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("DELETE FROM cliente WHERE cod_cliente = %s", (values['-cod_cliente-'],))
+                cursor.execute("DELETE FROM cliente WHERE cpf_cliente = %s", (values['-cpf_cliente-'],))
         lista2.pop(indice2)
         indice2 -= 1
         atualiza2()
