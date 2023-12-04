@@ -1849,16 +1849,63 @@ GROUP BY i.cal_data
 ORDER BY i.cal_data;
 
 -- clientes que compraram acima do ticket médio para propaganda
+
 SELECT c.nome_cliente, c.email_cliente
-FROM ingresso i 
-INNER JOIN cliente c ON c.cod_cliente = i.cod_cliente
-GROUP BY c.nome_cliente, c.email_cliente
-HAVING AVG(i.valor_ingresso) > (SELECT AVG(media) 
-FROM (SELECT  cod_cliente,cal_data,
-AVG(valor_ingresso) as media
-FROM ingresso 
-GROUP BY cod_cliente, cal_data
-having AVG(valor_ingresso) != 0))
+FROM cliente c
+INNER JOIN (
+    SELECT cod_cliente, SUM(valor_ingresso) as total_gasto
+    FROM ingresso
+    GROUP BY cod_cliente, cal_data
+    HAVING SUM(valor_ingresso) != 0
+) i ON c.cod_cliente = i.cod_cliente
+GROUP BY i.total_gasto, c.nome_cliente, c.email_cliente
+HAVING i.total_gasto > (
+    SELECT AVG(ticket)
+    FROM (
+        SELECT cod_cliente, SUM(valor_ingresso) as ticket
+        FROM ingresso
+        GROUP BY cod_cliente, cal_data
+        HAVING SUM(valor_ingresso) != 0
+    ) as subconsulta
+);
 
 -- qual o dia, na média, dentro de novembro, teve a maior receita?
 
+WITH ReceitaPorDia AS (
+  SELECT 
+    c.dia_semana, 
+    SUM(valor_ingresso) as receita_total_dia 
+  FROM 
+    ingresso i 
+    JOIN calendario c ON c.cal_data = i.cal_data 
+  WHERE 
+    dia_semana NOT ILIKE '%SEGUNDA%'  -- Exclui as segundas-feiras
+  GROUP BY 
+    dia_semana
+),  rank_dia AS (
+SELECT 
+  dia_semana,
+  receita_total_dia,
+  RANK() OVER (ORDER BY receita_total_dia DESC) as ranking_vendas
+FROM ReceitaPorDia)
+
+SELECT dia_semana, receita_total_dia
+from rank_dia
+WHERE ranking_vendas = 1 OR ranking_vendas = 6
+
+-- idade mais frequentes dos visitantes do parque
+
+WITH idade_tb AS (SELECT  EXTRACT(YEAR FROM AGE(CURRENT_DATE, d.data_nasci_dependente)) AS idade
+FROM dependente d
+INNER JOIN ingresso i ON i.cod_dependente = d.cod_dependente),
+
+rank_idade AS (
+  SELECT idade, COUNT(*) AS frequencia,
+         RANK() OVER (ORDER BY COUNT(*) DESC) AS rnk
+  FROM idade_tb
+  GROUP BY idade
+)
+
+SELECT idade, frequencia
+FROM rank_idade
+WHERE rnk = 1 or rnk = 2 or rnk = 3;
