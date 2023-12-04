@@ -10,7 +10,7 @@ import io
 import os
 import datetime
 
-sg.theme('DarkAmber') 
+sg.theme('DarkBrown5') 
 
 con = psycopg2.connect(host = 'localhost', database = 'projeto_integrador_g2', 
                        user = 'postgres', password = 'thor1234')
@@ -402,18 +402,36 @@ while True:
     elif event == "-PESQUISAR-":
         with con:
             with con.cursor() as cursor:
-                cursor.execute("SELECT cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE cpf_cliente = %s;",
-                    (values['-cpf_cliente-'],))
-                resposta1 = cursor.fetchall()
-                lista1.clear()
-                for i in range(len(resposta1)):
-                    lista1.append( list(resposta1[i]) )
-                if len(resposta1) == 0:
-                    sg.popup('Cliente não cadastrado')   
-                elif len(resposta1) > 0:
-                    sg.popup('Cliente já cadatrado')
-                    atualiza1()
-                indice1 = 0
+                # cursor.execute("SELECT cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE cpf_cliente = %s;",
+                #     (values['-cpf_cliente-'],))
+                # resposta1 = cursor.fetchall()
+                # lista1.clear()
+                # for i in range(len(resposta1)):
+                #     lista1.append( list(resposta1[i]) )
+                # if len(resposta1) == 0:
+                #     sg.popup('Cliente não cadastrado')   
+                # elif len(resposta1) > 0:
+                #     sg.popup('Cliente já cadatrado')
+                #     atualiza1()
+                # indice1 = 0
+                try:
+                    cpf_cliente = int(values['-cpf_cliente-'])
+                    
+                    cursor.execute("SELECT cod_cliente, nome_cliente, cpf_cliente, data_nasci_cliente, rua_num_cliente, email_cliente, telefone_cliente, sexo_cliente, cep, uf, cidade, bairro FROM cliente WHERE cpf_cliente = %s;",
+                     (values['-cpf_cliente-'],))
+                    resposta1 = cursor.fetchall()
+                    lista1.clear()
+                    for i in range(len(resposta1)):
+                        lista1.append( list(resposta1[i]) )
+                    if len(resposta1) == 0:
+                        sg.popup('Cliente não cadastrado')   
+                    elif len(resposta1) > 0:
+                        sg.popup('Cliente já cadastrado')
+                        atualiza1()
+                    indice1 = 0
+                
+                except ValueError:
+                    sg.popup_error('Por favor, insira um CPF válido.')
             
                 
                 
